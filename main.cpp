@@ -20,7 +20,7 @@ int main(){
 	position pos;
 	pos.head=NULL, pos.previous=NULL;
 	
-	fstream file ("input.conf");
+	fstream file ("samples/input.conf");
 	file>> max_count;
 	cout<< "Total number of nodes: "<< max_count;
 	node = new Node [max_count];
