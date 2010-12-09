@@ -72,7 +72,8 @@ namespace Server
         {
             RemoteAsyncShareObjectDelegate del;
             ServerToServerServices friend;
-             
+            Friend predecessor = null;
+
             MessageBox.Show(ServerApp._myUri + " received a request to share " + file.FileName);
 
             foreach (DateTime d in ServerApp._user.ReceivedMessages)
@@ -86,19 +87,45 @@ namespace Server
             ServerApp._user.ReceivedMessages.Add(nounce);
 
             MessageBox.Show(ServerApp._myUri + " testing " + file.FileName[0] + " vs " + ServerApp._user.Username[0]);
-            if (ServerApp._user.Username[0] >= file.FileName[0])
+            /*if (ServerApp._user.Username[0] >= file.FileName[0])
                 MessageBox.Show("EQUAL");
             else
                 MessageBox.Show("DIFFER");
-
-            if (ServerApp._user.Username[0] == file.FileName[0]) 
+            */
+            if (ServerApp._user.Username[0] == file.FileName[0])
             {
                 //should store in redirection
-                MessageBox.Show(ServerApp._myUri + " will put uri on redirection list.");
+                MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
                 ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
+                return;
             }
             else
             {
+                foreach (Friend node in ServerApp._user.Friends)
+                    if (!node.SucessorSwarm)
+                    {
+                        predecessor = node;
+                        break;
+                    }
+                if (predecessor == null)
+                {
+                    MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
+                    return;
+                }
+                if (predecessor.Name[0] > ServerApp._user.Username[0] && file.FileName[0] > predecessor.Name[0])
+                {
+                    //should store in redirection
+                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
+                    ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
+                    return;
+                }
+                if (file.FileName[0] > predecessor.Name[0] && file.FileName[0] < ServerApp._user.Username[0])
+                {
+                    //should store in redirection
+                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
+                    ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
+                    return;
+                }
                 //if(lower[0] >= ServerApp._user.Username[0])
 
                 //should continue sending
@@ -113,8 +140,8 @@ namespace Server
                                 f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
 
                             del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
-                            del.BeginInvoke(file, uri, nounce,ServerApp._myUri,
-                                (ServerApp._user.Username[0]>lowest[0])?lowest:ServerApp._user.Username, null, null);
+                            del.BeginInvoke(file, uri, nounce, ServerApp._myUri,
+                                (ServerApp._user.Username[0] > lowest[0]) ? lowest : ServerApp._user.Username, null, null);
                         }
                     }
                 }
