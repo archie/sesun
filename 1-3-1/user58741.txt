@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<User xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ReceivedMessages />
+  <UserPosts>
+    <Post>
+      <Text>2-2 added 3-0</Text>
+      <Autor>2-2</Autor>
+      <TimeStamp>2010-12-08T19:09:08.5252031+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>2-2 added 1-0</Text>
+      <Autor>2-2</Autor>
+      <TimeStamp>2010-12-08T19:10:12.1528423+00:00</TimeStamp>
+    </Post>
+  </UserPosts>
+  <ObjectList />
+  <RedirectionList />
+  <Friends>
+    <Friend>
+      <SucessorSwarm>true</SucessorSwarm>
+      <Name>3-0</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:56941</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>false</SucessorSwarm>
+      <Name>1-0</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:58511</string>
+      </Uris>
+    </Friend>
+  </Friends>
+  <PendingFriends />
+  <Username>2-2</Username>
+  <SpoofAdress>tcp://169.254.28.0:58741</SpoofAdress>
+</User>
