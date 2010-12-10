@@ -3,13 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PKI
+namespace PADIbookCommonLib
 {
     [Serializable]
     public class CipheredChallenge
     {
         private byte[] _challenge;
         private string _senderid;
+        private byte[] _signature;
+
+        public byte[] Signature
+        {
+            get { return _signature; }
+            set { _signature = value; }
+        }
 
         public byte[] EncryptedResponse
         {

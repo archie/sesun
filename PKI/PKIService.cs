@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Security.Cryptography;
 using System.IO;
+using PADIbookCommonLib;
 
 
 namespace PKI
@@ -19,8 +20,7 @@ namespace PKI
         private Thread _outputThread;
         private int _beep = 0;
 
-        private static RSACryptoServiceProvider rsa;
-        private static bool rsaFirstTimeCalled = true;
+        private static RSACryptoServiceProvider _rsa;
 
         private string _pkiURI;
 
@@ -47,7 +47,7 @@ namespace PKI
                     "PKIService", WellKnownObjectMode.Singleton);
             PkiURI = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
 
-            _output.AddMessage("PKI Service at: " + PkiURI);
+            Console.WriteLine("PKI Service at: " + PkiURI);
 
             while (true) 
             {
@@ -57,43 +57,6 @@ namespace PKI
                 beep();
             }
         }
-
-        public static SignedEntry sign(UserEntry ue)
-        {
-            SignedEntry se = new SignedEntry();
-            se.Entry = ue;
-
-            byte[] data = Encoding.Default.GetBytes(ue.ToString());
-
-            if (rsaFirstTimeCalled)
-            {
-                rsa = new RSACryptoServiceProvider();
-                try
-                {
-                    TextReader tr = new StreamReader("pki.xml");
-                    rsa.FromXmlString(tr.ReadToEnd());
-                    tr.Close();
-                }
-                catch (FileNotFoundException)
-                {
-                    TextWriter tw = new StreamWriter("pki.xml");
-                    tw.Write(rsa.ToXmlString(true));
-                    tw.Close();
-
-                    tw = new StreamWriter("pki_pub.xml");
-                    tw.Write(rsa.ToXmlString(false));
-                    tw.Close();
-                }
-                rsaFirstTimeCalled = false;
-            }
-            
-            byte[] signature = rsa.SignData(data, "SHA1");
-            se.Signature = signature;
-
-            return se;
-            
-        }
-
 
         private void beep()
         {
@@ -105,15 +68,52 @@ namespace PKI
             }
         }
 
+        public static SignedEntry sign(UserEntry ue)
+        {
+            SignedEntry signedEntry = new SignedEntry();
+            signedEntry.Entry = ue;
+
+            byte[] data = Encoding.Default.GetBytes(ue.ToString());
+            signedEntry.Signature = _rsa.SignData(data, "SHA1");
+
+            return signedEntry;
+            
+        }
+
+        private static void loadRsaProvider()
+        {
+            _rsa = new RSACryptoServiceProvider();
+            try
+            {
+                Console.WriteLine("PKI Public Key exists, loading to memory.");
+                TextReader tr = new StreamReader(".\\pki.xml");
+                _rsa.FromXmlString(tr.ReadToEnd());
+                tr.Close();
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("No Public Key for PKI exists, creating one.");
+                TextWriter tw = new StreamWriter(".\\pki.xml");
+                tw.Write(_rsa.ToXmlString(true));
+                tw.Close();
+
+                tw = new StreamWriter(".\\pki_pub.xml");
+                tw.Write(_rsa.ToXmlString(false));
+                tw.Close();
+            }
+        }
+
         static void Main(string[] args)
         {   
             // start PKI service
             Console.WriteLine("Starting PKI Service...");
             
             PKIService service = new PKIService();
+            loadRsaProvider();
+            
             service.Run();
 
-            Console.WriteLine("World domination. PKI Service end.");
+            Console.WriteLine("World domination accomplished.");
         }
     }
 
@@ -132,11 +132,12 @@ namespace PKI
             {
                 if (inBuffer.Count > 0)
                 {
-                    if (inBuffer[0].Equals("exit")) 
+                    if (inBuffer[0].Equals("exit"))
                         break;
-                    else if ( inBuffer[0].Equals("test"))                   
-                        runTest();
-                    
+                    else if (inBuffer[0].Equals("list"))
+                        listUsers();
+
+                    inBuffer.RemoveAt(0);
 
                     foreach (string s in inBuffer)
                         Console.WriteLine(s);
@@ -153,17 +154,10 @@ namespace PKI
             inBuffer.Add(s);
         }
 
-        private void runTest()
+        private void listUsers()
         {
-            Console.WriteLine("Initiating test");
-            NodePKIHelper nt = new NodePKIHelper("tcp://192.168.174.128", 50000);
-            nt.TestRegister();
-            Thread.Sleep(1000);
-            nt.Test();
-            Thread.Sleep(1000);
-            nt.TestGetKey();
-            inBuffer.RemoveAt(0);
-            Console.WriteLine("Test completed");
+            Console.WriteLine("Want to list all users here... not yet sure how.");
         }
+
     }
 }

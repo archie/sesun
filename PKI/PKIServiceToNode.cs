@@ -3,69 +3,76 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
+using PADIbookCommonLib;
 
 namespace PKI
 {
-    public interface PKIServiceToNode
-    {
-        byte[] Register(UserEntry entry);
-        bool IsRegistered(string id);
-        SignedEntry GetPublicKey(string id);
-        bool ChallengeResponse(CipheredChallenge response);
-    }
 
-    public delegate bool RemoteAsyncUserIsRegisteredDelegate(string id);
-    public delegate byte[] RemoteAsyncUserRegisterDelegate(UserEntry ue);
-    public delegate bool RemoteAsyncUserRegisterChallengeResponseDelegate(CipheredChallenge cc);
-    public delegate SignedEntry RemoteAsyncGetPubKeyDelegate(string id);
-    public delegate void RemoteAsyncUserResponseDelegate(CipheredChallenge response);
-
-    class PKIServiceNodeToObject : MarshalByRefObject, PKIServiceToNode 
+    class PKIServiceNodeToObject : MarshalByRefObject, PKIServices
     {
         private LinkedList<UserEntry> userDB;
-        private Dictionary<UserEntry, byte[]> waitingChallenge; 
+        private Dictionary<UserEntry, byte[]> waitingChallenge;
+        private Random _rand;
 
         public PKIServiceNodeToObject()
         {
+            _rand = new Random(DateTime.Now.Millisecond);
             waitingChallenge = new Dictionary<UserEntry, byte[]>();
             userDB = new LinkedList<UserEntry>();
         }
 
         public byte[] Register(UserEntry entry)
         {
-            Random rand = new Random(123);
-            int challenge = rand.Next();
+            Console.WriteLine("Got register request from: " + entry.NodeId);
+            int challenge = _rand.Next();
             byte[] rawChallenge = Encoding.Default.GetBytes(challenge.ToString());
             waitingChallenge.Add(entry, rawChallenge);
+            Console.WriteLine("Added <" + entry.NodeId + "," + challenge + ">");
             return rawChallenge;
         }
 
         public bool ChallengeResponse(CipheredChallenge response)
         {
+            Console.WriteLine("Got ciphered challenge (" + response.Signature 
+                + ") response from " + response.Sender);
+
             UserEntry pendingUser = null;
-            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            
             foreach (UserEntry e in waitingChallenge.Keys) 
             {
-                if (e.NodeId.Equals(response)) 
+                if (e.NodeId.Equals(response.Sender)) 
                 {
                     pendingUser = e;
                     break;
                 }
             }
 
-            rsa.FromXmlString(pendingUser.PubKey);
-            byte[] receivedChallenge = rsa.Decrypt(response.EncryptedResponse, false);
-            waitingChallenge.Remove(pendingUser);
+            if (pendingUser == null)
+                return false;
 
-            if (waitingChallenge[pendingUser].Equals(receivedChallenge))
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(pendingUser.PubKey); // load pending user's pubkey
+
+            try
             {
-                userDB.AddFirst(pendingUser);
-                return true;
+                if (rsa.VerifyData(waitingChallenge[pendingUser], "SHA1", response.Signature))
+                {
+                    Console.WriteLine("Received response matches the challenge sent. " +
+                        "(Verified with " + response.Sender + " public key)");
+                    userDB.AddFirst(pendingUser);
+                    waitingChallenge.Remove(pendingUser);
+                    return true;
+                }
             }
-            else
+            catch (CryptographicException ce)
             {
+                Console.WriteLine("Could not confirm challenge for user: " + response.Sender + "\n"
+                    + ce.Message);
+                waitingChallenge.Remove(pendingUser);
                 return false;
             }
+            
+            return false;
         }
 
         public bool IsRegistered(string id)

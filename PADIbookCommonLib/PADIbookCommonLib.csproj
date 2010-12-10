@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CipheredChallenge.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageInsertRing.cs" />
     <Compile Include="MessageRegister.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Interest.cs" />
     <Compile Include="InvalidPendingFriendException.cs" />
     <Compile Include="InvalidFriendUriException.cs" />
+    <Compile Include="NodePKIHelper.cs" />
     <Compile Include="ObjectFile.cs" />
     <Compile Include="Post.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -72,7 +74,9 @@
     <Compile Include="QueryByGenderAge.cs" />
     <Compile Include="RedirectionFile.cs" />
     <Compile Include="RegisteredInterest.cs" />
+    <Compile Include="SignedEntry.cs" />
     <Compile Include="User.cs" />
+    <Compile Include="UserEntry.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -22,7 +22,7 @@
     </SccProvider>
     <ManifestCertificateThumbprint>251D69C95F285CAB625C48651EE946B42AF98024</ManifestCertificateThumbprint>
     <ManifestKeyFile>Server_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>false</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -39,6 +39,8 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetZone>LocalIntranet</TargetZone>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,6 +65,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -99,6 +102,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="ClassDiagram1.cd" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -115,6 +119,10 @@
     <ProjectReference Include="..\PADIbookCommonLib\PADIbookCommonLib.csproj">
       <Project>{2A1D8531-8734-4CCD-9D4B-9C97C716EAFB}</Project>
       <Name>PADIbookCommonLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PKI\PKI.csproj">
+      <Project>{3294060E-77D0-49DC-A328-E5D0A2E46B80}</Project>
+      <Name>PKI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

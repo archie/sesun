@@ -130,4 +130,19 @@ namespace PADIbookCommonLib
         void serviceUnavailable();
         void lookupInterestResponse(QueryByInterest q);
     }
+
+    /* PKI SERVICE DELEGATES */
+    public delegate bool RemoteAsyncUserIsRegisteredDelegate(string id);
+    public delegate byte[] RemoteAsyncUserRegisterDelegate(UserEntry ue);
+    public delegate bool RemoteAsyncUserRegisterChallengeResponseDelegate(CipheredChallenge cc);
+    public delegate SignedEntry RemoteAsyncGetPubKeyDelegate(string id);
+    public delegate void RemoteAsyncUserResponseDelegate(CipheredChallenge response);
+
+    public interface PKIServices
+    {
+        byte[] Register(UserEntry entry);
+        bool IsRegistered(string id);
+        SignedEntry GetPublicKey(string id);
+        bool ChallengeResponse(CipheredChallenge response);
+    }
 }

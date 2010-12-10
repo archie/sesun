@@ -47,13 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NodePKIHelper.cs" />
     <Compile Include="PKIServiceToNode.cs" />
     <Compile Include="PKIService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SignedEntry.cs" />
-    <Compile Include="CipheredChallenge.cs" />
-    <Compile Include="UserEntry.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PADIbookCommonLib\PADIbookCommonLib.csproj">
