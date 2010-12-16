@@ -138,9 +138,9 @@ namespace Server
                 */
                 foreach (Friend friend in user.PendingFriends)
                 {
-                    redirectionRichTextBox.Text += friend.Name + "\r\n";
+                    debugRich.Text += friend.Name + "\r\n";
                     foreach (string uri in friend.Uris)
-                        redirectionRichTextBox.Text += uri + "\r\n";
+                        debugRich.Text += uri + "\r\n";
                 }
 
                 //replicasTextBox.Text += "No replicas";//ServerApp._replicaOneURI + "\r\n" + ServerApp._replicaTwoURI;

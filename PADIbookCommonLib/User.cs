@@ -17,7 +17,15 @@ namespace PADIbookCommonLib
         private List<ObjectFile> _objectList;
         private List<RedirectionFile> _redirectionList;
 
-        public static List<DateTime> _receivedMessages;
+        public static List<QueryByName> _receivedNameMessages;
+        public static List<QueryByFile> _receivedFileMessages;
+        public static List<DateTime> _sentMessages;
+
+        public List<DateTime> SentMessages
+        {
+            get { return _sentMessages; }
+            set { _sentMessages = value; }
+        }
 
         /*public List<String> AnelGeralUris
         {
@@ -37,10 +45,16 @@ namespace PADIbookCommonLib
             set { _regInterests = value; }
         }*/
 
-        public List<DateTime> ReceivedMessages
+        public List<QueryByFile> ReceivedFileMessages
         {
-            get { return _receivedMessages; }
-            set { _receivedMessages = value; }
+            get { return _receivedFileMessages; }
+            set { _receivedFileMessages = value; }
+        }
+
+        public List<QueryByName> ReceivedNameMessages
+        {
+            get { return _receivedNameMessages; }
+            set { _receivedNameMessages = value; }
         }
 
         /*public List<Interest> Interests
@@ -191,7 +205,9 @@ namespace PADIbookCommonLib
             _redirectionList = new List<RedirectionFile>();
             _objectList = new List<ObjectFile>();
 
-            _receivedMessages = new List<DateTime>();
+            _receivedNameMessages = new List<QueryByName>();
+            _receivedFileMessages = new List<QueryByFile>();
+            _sentMessages = new List<DateTime>();
             //_anelGeralUris = new List<String>();
             //_regInterests = new List<RegisteredInterest>();
             //_isRegisteredInAnelGeral = false;
@@ -208,7 +224,9 @@ namespace PADIbookCommonLib
             _redirectionList = new List<RedirectionFile>();
             _objectList = new List<ObjectFile>();
 
-            _receivedMessages = new List<DateTime>();
+            _receivedNameMessages = new List<QueryByName>();
+            _receivedFileMessages = new List<QueryByFile>();
+            _sentMessages = new List<DateTime>();
             //_anelGeralUris = new List<String>();
             //_regInterests = new List<RegisteredInterest>();
             //_isRegisteredInAnelGeral = false;

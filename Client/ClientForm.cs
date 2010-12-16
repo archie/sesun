@@ -515,7 +515,7 @@ namespace Client
             try
             {
                 string friendUri = friendsAddUriText.Text;
-                new Uri(friendUri);
+                //new Uri(friendUri);
 
                 RemoteAsyncUriDelegate del = new RemoteAsyncUriDelegate(_server.sendFriendRequest);
                 del.BeginInvoke(friendUri, null, null);

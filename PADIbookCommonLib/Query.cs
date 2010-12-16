@@ -13,6 +13,8 @@ namespace PADIbookCommonLib
         private List<string> _uris;
         private String _name;
 
+        public Query() { }
+
         public String Name
         {
             get { return _name; }

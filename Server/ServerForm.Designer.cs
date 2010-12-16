@@ -45,6 +45,7 @@
             this.objectsRichTextBox = new System.Windows.Forms.RichTextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.loadButton = new System.Windows.Forms.Button();
+            this.debugRich = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.freeze_period)).BeginInit();
             this.SuspendLayout();
             // 
@@ -211,6 +212,14 @@
             this.loadButton.UseVisualStyleBackColor = true;
             this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
             // 
+            // debugRich
+            // 
+            this.debugRich.Location = new System.Drawing.Point(12, 380);
+            this.debugRich.Name = "debugRich";
+            this.debugRich.Size = new System.Drawing.Size(88, 26);
+            this.debugRich.TabIndex = 22;
+            this.debugRich.Text = "";
+            // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -218,6 +227,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(489, 414);
+            this.Controls.Add(this.debugRich);
             this.Controls.Add(this.loadButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.objectsRichTextBox);
@@ -263,6 +273,7 @@
         private System.Windows.Forms.RichTextBox objectsRichTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button loadButton;
+        private System.Windows.Forms.RichTextBox debugRich;
     }
 }
 

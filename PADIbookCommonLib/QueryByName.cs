@@ -13,5 +13,7 @@ namespace PADIbookCommonLib
         {
 
         }
+
+        public QueryByName() : base(){ }
     }
 }

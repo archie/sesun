@@ -69,6 +69,7 @@
     <Compile Include="Post.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
+    <Compile Include="QueryByFile.cs" />
     <Compile Include="QueryByInterest.cs" />
     <Compile Include="QueryByName.cs" />
     <Compile Include="QueryByGenderAge.cs" />

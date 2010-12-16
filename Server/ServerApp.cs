@@ -124,6 +124,7 @@ namespace Server
                     WellKnownObjectMode.Singleton);
 
             _myUri = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
+            _primaryURI = _myUri;
             _serverPort = args[0];
         }
 

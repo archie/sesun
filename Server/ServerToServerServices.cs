@@ -21,6 +21,8 @@ namespace Server
             //ReplicationServices replica;
             //RemoteAsyncFriendDelegate remoteDel;
 
+            MessageBox.Show(ServerApp._user.Username + " -> ServerToserver : sendFriendRequest(adds pending friend) : " + friend.Name + " %s" +friend.Uris.ElementAt(0));
+
             try
             {
                 ServerApp._user.addPendingFriend(friend);
@@ -68,84 +70,139 @@ namespace Server
             changedel.BeginInvoke(name, primary, null, null);
         }
 
-        public void shareObject(ObjectFile file, String uri, DateTime nounce, String contactingUri, String lowest)
+        public void shareObject(QueryByFile query)
         {
             RemoteAsyncShareObjectDelegate del;
             ServerToServerServices friend;
             Friend predecessor = null;
+            List<QueryByFile> messageList = new List<QueryByFile>();
+            List<String> contacting = new List<string>();
+            int i, j,counting;
+            QueryByFile q1, q2;
+            Boolean sendMessage = false;
 
-            MessageBox.Show(ServerApp._myUri + " received a request to share " + file.FileName);
 
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
+            MessageBox.Show(ServerApp._myUri + " received a request to share " + query.Name);
+
+            if (ServerApp._user.SentMessages.Contains(query.Id))
             {
-                if (d.Equals(nounce))
-                {
-                    MessageBox.Show(ServerApp._myUri + " received a request to share but message was REPEATED");
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(nounce);
-
-            MessageBox.Show(ServerApp._myUri + " testing " + file.FileName[0] + " vs " + ServerApp._user.Username[0]);
-            /*if (ServerApp._user.Username[0] >= file.FileName[0])
-                MessageBox.Show("EQUAL");
-            else
-                MessageBox.Show("DIFFER");
-            */
-            if (ServerApp._user.Username[0] == file.FileName[0])
-            {
-                //should store in redirection
-                MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
-                ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
+                MessageBox.Show(ServerApp._user.Username + " : Message was already sent so the request was discarted!");
                 return;
             }
-            else
+
+            contacting.Add(ServerApp._myUri);
+            ServerApp._user.ReceivedFileMessages.Add(query);
+
+            //Checks if it has received #predecessors/2 answers, if so it responds and stores Datetime on sentMessages
+            //otherwise it adds query to receivedMessages
+            foreach (Query q in ServerApp._user.ReceivedFileMessages)
             {
-                foreach (Friend node in ServerApp._user.Friends)
-                    if (!node.SucessorSwarm)
-                    {
-                        predecessor = node;
-                        break;
-                    }
-                if (predecessor == null)
-                {
-                    MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
-                    return;
-                }
-                if (predecessor.Name[0] > ServerApp._user.Username[0] && file.FileName[0] > predecessor.Name[0])
-                {
-                    //should store in redirection
-                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
-                    ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
-                    return;
-                }
-                if (file.FileName[0] > predecessor.Name[0] && file.FileName[0] < ServerApp._user.Username[0])
-                {
-                    //should store in redirection
-                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
-                    ServerApp._user.addRedirection(new RedirectionFile(file.FileName, uri));
-                    return;
-                }
-                //if(lower[0] >= ServerApp._user.Username[0])
-
-                //should continue sending
-                foreach (Friend f in ServerApp._user.Friends)
-                {
-                    if (f.Uris.ElementAt(0) != null && f.SucessorSwarm)
-                    {
-                        if (f.Uris.ElementAt(0).CompareTo(contactingUri) != 0)
-                        {
-                            //MessageBox.Show(ServerApp._myUri + " sending a request to share to " + f.Uris.ElementAt(0));
-                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-
-                            del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
-                            del.BeginInvoke(file, uri, nounce, ServerApp._myUri,
-                                (ServerApp._user.Username[0] > lowest[0]) ? lowest : ServerApp._user.Username, null, null);
-                        }
-                    }
+                if (q.Id.Equals(query.Id)){
+                    messageList.Add((QueryByFile)q);
                 }
             }
+
+            if (messageList.Count > ServerApp._user.Friends.Count(x => !x.SucessorSwarm) / 2)
+            {
+                //anwer message
+                //do consensus thing------------------------------
+
+                for (i = 0; i<messageList.Count;i++ )
+                {
+                    q1 = messageList.ElementAt(i);
+                    counting = 0;
+                    for (j = i + 1;j<messageList.Count ;j++ )
+                    {
+                        q2 = messageList.ElementAt(j);
+                        if (q1.Name.CompareTo(q2.Name) == 0 &&
+                            q1.LowestId.CompareTo(q2.LowestId) == 0 &&
+                            q1.Uris.ElementAt(0).CompareTo(q2.Uris.ElementAt(0)) == 0)
+                            counting++;
+
+                    }
+                    if (counting + 1 >= ServerApp._user.Friends.Count(x => !x.SucessorSwarm) / 2)
+                    {
+                        sendMessage = true;
+                        break;
+                    }
+                }
+
+                //-------------------------------------------------
+
+                if(sendMessage){
+
+                    if (ServerApp._user.Username[0] == query.Name[0])
+                    {
+                        //should store in redirection
+                        MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
+                        ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                        return;
+                    }
+                    else
+                    {
+                        foreach (Friend node in ServerApp._user.Friends)
+                            if (!node.SucessorSwarm)
+                            {
+                                predecessor = node;
+                                break;
+                            }
+                        if (predecessor == null)
+                        {
+                            MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
+                            return;
+                        }
+                        if (predecessor.Name[0] > ServerApp._user.Username[0] && query.Name[0] > predecessor.Name[0])
+                        {
+                            //should store in redirection
+                            MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
+                            ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                            return;
+                        }
+                        if (query.Name[0] > predecessor.Name[0] && query.Name[0] < ServerApp._user.Username[0])
+                        {
+                            //should store in redirection
+                            MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
+                            ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                            return;
+                        }
+                        //if(lower[0] >= ServerApp._user.Username[0])
+
+                        //should continue sending
+                        foreach (Friend f in ServerApp._user.Friends)
+                        {
+                            if (f.Uris.ElementAt(0) != null && f.SucessorSwarm)
+                            {
+                                if (f.Uris.ElementAt(0).CompareTo(query.ContactingServerUri.ElementAt(0)) != 0)
+                                {
+                                    //MessageBox.Show(ServerApp._myUri + " sending a request to share to " + f.Uris.ElementAt(0));
+                                    friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
+                                        f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
+
+
+                                    q1 = new QueryByFile(query.Name, query.Uris, contacting,
+                                        (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username);
+
+                                    del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
+                                    del.BeginInvoke(q1, null, null);
+                                }
+                            }
+                        }
+
+                    }
+                }
+                else
+                    MessageBox.Show(ServerApp._user.Username + " : There are enough messages but still no consensus.");
+            }
+            else
+            {
+                MessageBox.Show(ServerApp._user.Username + " : Still not enough messages to do consensus.");
+            }
+
+            MessageBox.Show("MARCUS owns c#" + ServerApp._user.ReceivedFileMessages.Count(x => x.Id.Equals(query.Id)));
+            //ServerApp._user.ReceivedMessages.Add(nounce);
+
+            //MessageBox.Show(ServerApp._myUri + " testing " + file.FileName[0] + " vs " + ServerApp._user.Username[0]);
+
         }
 
         public void getName(String responseUri)
@@ -270,14 +327,14 @@ namespace Server
             //newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);
             //newQ.ContactingServerUri.Add(ServerApp._replicaTwoURI);
 
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
+            foreach (Query qu in ServerApp._user.ReceivedNameMessages)
             {
-                if (d.Equals(q.Id))
+                if (qu.Id.Equals(qu.Id))
                 {
                     return;
                 }
             }
-            ServerApp._user.ReceivedMessages.Add(q.Id);
+            ServerApp._user.ReceivedNameMessages.Add(q);
             //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :O nome a testar e" + q.Name);
 
             if (ServerApp._user.Username.CompareTo(q.Name) == 0)
