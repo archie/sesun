@@ -33,24 +33,7 @@ namespace Client
             ClientApp._form.BeginInvoke(updateDelegate,name,uri,redList);
         }
 
-        public void lookupGeneralRingResponse(QueryByInterest q)
-        {
-            //TODO
-            //System.Windows.Forms.MessageBox.Show(ClientApp._user.Username + " : Ja tenho o GeneralRing!");
-        }
-
-        public void lookupSexAgeResponse(QueryByGenderAge q)
-        {
-            UpdateLookupSexAgeDelegate updateDelegate = new UpdateLookupSexAgeDelegate(ClientApp._form.refreshLookupSexAge);
-            ClientApp._form.BeginInvoke(updateDelegate, q);
-        }
-
-        public void lookupInterestResponse(QueryByInterest q)
-        {
-            UpdateLookupInterestDelegate updateDelegate = new UpdateLookupInterestDelegate(ClientApp._form.refreshLookupInterest);
-            ClientApp._form.BeginInvoke(updateDelegate, q);
-        }
-
+  
         public void refreshFriends()
         {
             //MessageBox.Show(ClientApp._user.Username + " : Vou mandar o form refrescar os meus amigos");

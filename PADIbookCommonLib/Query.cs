@@ -44,18 +44,18 @@ namespace PADIbookCommonLib
             _id = DateTime.Now;
         }
 
-        public Query(List<string> uris, List<string> contactingServerUri)
+        public Query(List<string> uris, List<string> contactingServerUri,DateTime id)
         {
             _uris = uris;
             _contactingServerUri = contactingServerUri;
-            _id = DateTime.Now;
+            _id = id;
             _name = "";
         }
-        public Query(String name, List<string> uris, List<string> contactingServerUri)
+        public Query(String name, List<string> uris, List<string> contactingServerUri,DateTime id)
         {
             _uris = uris;
             _contactingServerUri = contactingServerUri;
-            _id = DateTime.Now;
+            _id = id;
             _name = name;
         }
     }

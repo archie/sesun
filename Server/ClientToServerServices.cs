@@ -21,7 +21,7 @@ namespace Server
 
             contacting.Add(ServerApp._primaryURI);
             uri.Add(ServerApp._primaryURI);
-            QueryByFile query = new QueryByFile(file.FileName, uri, contacting, ServerApp._user.Username);
+            QueryByFile query = new QueryByFile(file.FileName, uri, contacting, ServerApp._user.Username,DateTime.Now);
 
             MessageBox.Show(ServerApp._myUri + " wants to share " + file.FileName);
 
@@ -545,31 +545,6 @@ namespace Server
             return friend;
         }
 
-        public void lookupByAgeGender(QueryByGenderAge query)
-        {
-            ClientServices client;
-
-            if (!ServerApp._serviceAvailable)
-            {
-                client = ((ClientServices)Activator.GetObject(typeof(ClientServices),
-                    ServerApp._clientUri + "/" + ServicesNames.ClientServicesName));
-                new RemoteAsyncServiceUnavailableDelegate(client.serviceUnavailable).BeginInvoke(null, null);
-                return;
-            }
-
-            //todo: guardar id da query
-            string[] myUris = { ServerApp._primaryURI};//, ServerApp._replicaOneURI, ServerApp._replicaTwoURI };
-
-            query.ContactingServerUri = new List<string>(myUris);
-
-            foreach (Friend friend in ServerApp._user.Friends)
-            {
-                string friendUri = friend.Uris.ElementAt(0);
-                ServerToServerServices server = (ServerToServerServices)Activator.GetObject(
-                                typeof(ServerToServerServices),
-                                friendUri + "/" + ServicesNames.ServerToServerServicesName);
-                friend.Uris.ElementAt(0);
-            }
-        }
+      
     }
 }

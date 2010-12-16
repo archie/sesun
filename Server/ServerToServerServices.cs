@@ -82,7 +82,7 @@ namespace Server
             Boolean sendMessage = false;
 
 
-            MessageBox.Show(ServerApp._myUri + " received a request to share " + query.Name);
+            MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
 
             if (ServerApp._user.SentMessages.Contains(query.Id))
             {
@@ -95,12 +95,14 @@ namespace Server
 
             //Checks if it has received #predecessors/2 answers, if so it responds and stores Datetime on sentMessages
             //otherwise it adds query to receivedMessages
-            foreach (Query q in ServerApp._user.ReceivedFileMessages)
+            foreach (QueryByFile q in ServerApp._user.ReceivedFileMessages)
             {
                 if (q.Id.Equals(query.Id)){
-                    messageList.Add((QueryByFile)q);
+                    messageList.Add(q);
                 }
             }
+
+            MessageBox.Show("MessageCount = " + messageList.Count + " predecessors count = "+ ServerApp._user.Friends.Count(x => !x.SucessorSwarm));
 
             if (messageList.Count > ServerApp._user.Friends.Count(x => !x.SucessorSwarm) / 2)
             {
@@ -180,7 +182,7 @@ namespace Server
 
 
                                     q1 = new QueryByFile(query.Name, query.Uris, contacting,
-                                        (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username);
+                                        (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username,query.Id);
 
                                     del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
                                     del.BeginInvoke(q1, null, null);
@@ -321,7 +323,7 @@ namespace Server
             RemoteAsyncLookupNameDelegate remoteDel;
             RemoteAsyncLookupNameResponseDelegate remoteResDel;
 
-            QueryByName newQ = new QueryByName(q.Name, q.Uris, new List<string>());
+            QueryByName newQ = new QueryByName(q.Name, q.Uris, new List<string>(),q.Id);
             newQ.ContactingServerUri.Clear();
             newQ.ContactingServerUri.Add(ServerApp._primaryURI);
             //newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);

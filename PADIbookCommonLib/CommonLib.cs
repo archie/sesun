@@ -125,10 +125,7 @@ namespace PADIbookCommonLib
         void lookupNameResponse(String name, String uri, List<RedirectionFile> redList);
         void refreshFriends();
         void changeNameOfFriend(String name, String primary);
-        void lookupSexAgeResponse(QueryByGenderAge q);
-        void lookupGeneralRingResponse(QueryByInterest q);
         void serviceUnavailable();
-        void lookupInterestResponse(QueryByInterest q);
     }
 
     /* PKI SERVICE DELEGATES */
