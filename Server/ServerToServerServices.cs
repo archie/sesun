@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using PADIbookCommonLib;
 using System.Windows.Forms;
 
@@ -654,6 +655,11 @@ namespace Server
                     remoteDel.BeginInvoke(oldFriendUri, newFriendUri, null, null);
                 }
             }*/
+        }
+
+        public void FreezeService(int time)
+        {
+            Thread.Sleep(time);
         }
     }
 }

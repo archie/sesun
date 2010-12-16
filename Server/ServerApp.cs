@@ -23,6 +23,8 @@ namespace Server
         private static RSACryptoServiceProvider _rsaProvider;
         private static NodePKIHelper _pkiCommunicator;
 
+        private static System.Timers.Timer _freezeTimer;
+
         //null no primario
         public static string _primaryURI;
 
@@ -37,6 +39,8 @@ namespace Server
         public static ServerForm _form;
 
         public static string _serverPort;
+
+        private static ServerToServerServicesObject _ServerToServerServiceObject;
 
         //public static Boolean _freeze;
         //public static int _delay;
@@ -148,7 +152,13 @@ namespace Server
                     WellKnownObjectMode.Singleton);
 
             _myUri = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
+            _primaryURI = _myUri;
             _serverPort = args[0];
+
+
+            _ServerToServerServiceObject = (ServerToServerServicesObject)Activator.GetObject(
+                typeof(ServerToServerServicesObject),
+                ServerApp._myUri + "/" + ServicesNames.ServerToServerServicesName);
         }
 
         private static void loadNodePublicPrivateKeys()
@@ -171,6 +181,21 @@ namespace Server
         public static RSACryptoServiceProvider GetCryptoProvider()
         {
             return _rsaProvider;
+        }
+
+        public static void FreezeService(decimal period)
+        {
+            int freezeTime = Int32.Parse(period.ToString())*1000;
+            _freezeTimer = new System.Timers.Timer(freezeTime);
+            _freezeTimer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
+            _freezeTimer.Start();
+            _ServerToServerServiceObject.FreezeService(freezeTime);
+        }
+
+        static void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            _freezeTimer.Stop();
+            MessageBox.Show("Freeze timeout reached.");
         }
     }
 }

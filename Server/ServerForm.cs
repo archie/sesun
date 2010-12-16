@@ -174,7 +174,7 @@ namespace Server
             ServerApp._freeze = true;
             ServerApp._freezeThread.Start();
             */
-
+            ServerApp.FreezeService(this.freeze_period.Value);
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
