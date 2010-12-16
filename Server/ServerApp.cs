@@ -120,7 +120,7 @@ namespace Server
         private static RSACryptoServiceProvider readRSAPKI()
         {
             RSACryptoServiceProvider rsapki = new RSACryptoServiceProvider();
-            // we assume all nodes get this in a secure way have this
+            // we assume all nodes get the PKI pubkey in a secure manner
             try
             {
                 TextReader tr = new StreamReader(".\\pki_pub.xml");
