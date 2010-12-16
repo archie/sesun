@@ -18,9 +18,12 @@ namespace Server
     {
 
         public static User _user;
+        public static UserEntry _myUserEntry;
 
         private static RSACryptoServiceProvider _rsaProvider;
         private static NodePKIHelper _pkiCommunicator;
+
+        private static System.Timers.Timer _freezeTimer;
 
         //null no primario
         public static string _primaryURI;
@@ -36,6 +39,8 @@ namespace Server
         public static ServerForm _form;
 
         public static string _serverPort;
+
+        private static ServerToServerServicesObject _ServerToServerServiceObject;
 
         //public static Boolean _freeze;
         //public static int _delay;
@@ -88,14 +93,20 @@ namespace Server
             
             _form = new ServerForm(_myUri);
 
-            _pkiCommunicator = new NodePKIHelper(_rsaProvider, args[1]);
+            /* PKI Communication */
+            RSACryptoServiceProvider rsaPki = null;
+            if ((rsaPki = readRSAPKI()) == null)
+            {
+                MessageBox.Show("Couldn't load pubkey of PKI.");
+                Application.Exit();
+            }
+            _pkiCommunicator = new NodePKIHelper(_rsaProvider, rsaPki, args[1]);
+            _myUserEntry = new UserEntry();
+            _myUserEntry.NodeId = _user.Username;
+            _myUserEntry.Address = _myUri;
+            _myUserEntry.PubKey = _rsaProvider.ToXmlString(true);
             
-            UserEntry me = new UserEntry();
-            me.NodeId = _user.Username;
-            me.Address = _myUri;
-            me.PubKey = _rsaProvider.ToXmlString(true);
-            
-            if (_pkiCommunicator.Register(me))
+            if (_pkiCommunicator.Register(_myUserEntry))
             {
                 Application.Run(_form);
             }
@@ -104,6 +115,23 @@ namespace Server
                 Application.Exit();
             }
             
+        }
+
+        private static RSACryptoServiceProvider readRSAPKI()
+        {
+            RSACryptoServiceProvider rsapki = new RSACryptoServiceProvider();
+            // we assume all nodes get the PKI pubkey in a secure manner
+            try
+            {
+                TextReader tr = new StreamReader(".\\pki_pub.xml");
+                rsapki.FromXmlString(tr.ReadToEnd());
+                tr.Close();
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+            return rsapki;
         }
 
         private static void loadRPCServices(string[] args)
@@ -126,6 +154,11 @@ namespace Server
             _myUri = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
             _primaryURI = _myUri;
             _serverPort = args[0];
+
+
+            _ServerToServerServiceObject = (ServerToServerServicesObject)Activator.GetObject(
+                typeof(ServerToServerServicesObject),
+                ServerApp._myUri + "/" + ServicesNames.ServerToServerServicesName);
         }
 
         private static void loadNodePublicPrivateKeys()
@@ -148,6 +181,21 @@ namespace Server
         public static RSACryptoServiceProvider GetCryptoProvider()
         {
             return _rsaProvider;
+        }
+
+        public static void FreezeService(decimal period)
+        {
+            int freezeTime = Int32.Parse(period.ToString())*1000;
+            _freezeTimer = new System.Timers.Timer(freezeTime);
+            _freezeTimer.Elapsed += new System.Timers.ElapsedEventHandler(timer_Elapsed);
+            _freezeTimer.Start();
+            _ServerToServerServiceObject.FreezeService(freezeTime);
+        }
+
+        static void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            _freezeTimer.Stop();
+            MessageBox.Show("Freeze timeout reached.");
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading;
 
 namespace PADIbookCommonLib
 {
+    
     public class NodePKIHelper
     {
         private PKIServices pki;
@@ -16,13 +17,11 @@ namespace PADIbookCommonLib
         private RSACryptoServiceProvider pkiRsaProvider;
 
         /* default address: "tcp://localhost:50000" */
-        public NodePKIHelper(RSACryptoServiceProvider provider, string pkiAddress)
+        public NodePKIHelper(RSACryptoServiceProvider provider, 
+            RSACryptoServiceProvider rsa_provider_for_pki, string pkiAddress)
         {
             rsa = provider;
-            pkiRsaProvider = new RSACryptoServiceProvider();
-            TextReader tr = new StreamReader(".\\pki_pub.xml"); // we assume all nodes have this
-            pkiRsaProvider.FromXmlString(tr.ReadToEnd());
-            tr.Close();
+            pkiRsaProvider = rsa_provider_for_pki;
 
             pki = ((PKIServices)Activator.GetObject(typeof(PKIServices),
                 pkiAddress + "/" + "PKIService"));
@@ -33,7 +32,10 @@ namespace PADIbookCommonLib
             RemoteAsyncUserRegisterDelegate registerDelegate = 
                 new RemoteAsyncUserRegisterDelegate(pki.Register);
             byte[] challenge = registerDelegate(entryData);
-            
+
+            if (challenge == null)
+                return false; // wasn't allowed to register
+
             // cipher challenge with private key
             CipheredChallenge cc = new CipheredChallenge();
             cc.Signature = rsa.SignData(challenge, "SHA1");
