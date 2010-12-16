@@ -12,6 +12,7 @@ namespace PADIbookCommonLib
         private List<string> _contactingServerUri;
         private List<string> _uris;
         private String _name;
+        
 
         public Query() { }
 

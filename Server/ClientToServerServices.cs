@@ -23,6 +23,10 @@ namespace Server
             uri.Add(ServerApp._primaryURI);
             QueryByFile query = new QueryByFile(file.FileName, uri, contacting, ServerApp._user.Username,DateTime.Now);
 
+            byte[] data = Encoding.Default.GetBytes(query.ToString());
+            byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
+            SignedQueryByFile signedQuery = new SignedQueryByFile(query, signature);
+
             MessageBox.Show(ServerApp._myUri + " wants to share " + file.FileName);
 
             foreach (Friend f in ServerApp._user.Friends)
@@ -35,7 +39,7 @@ namespace Server
                     MessageBox.Show(ServerApp._myUri + " sends to " + f.Name);
 
                     del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
-                    del.BeginInvoke(query, null, null);
+                    del.BeginInvoke(signedQuery, null, null);
                 }
             }
 

@@ -43,6 +43,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -74,6 +75,8 @@
     <Compile Include="RedirectionFile.cs" />
     <Compile Include="RegisteredInterest.cs" />
     <Compile Include="SignedEntry.cs" />
+    <Compile Include="SignedMessage.cs" />
+    <Compile Include="SignedQueryByFile.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserEntry.cs" />
   </ItemGroup>

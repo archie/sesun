@@ -15,5 +15,10 @@ namespace PADIbookCommonLib
         }
 
         public QueryByName() : base(){ }
+
+        override public string ToString()
+        {
+            return Name + Uris.ElementAt(0) + ContactingServerUri.ElementAt(0) + Id.ToString();
+        }
     }
 }

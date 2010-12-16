@@ -44,7 +44,7 @@ namespace PKI
         {
             Console.WriteLine("Got register request from: " + entry.NodeId);
             
-            if (IsRegistered(entry.NodeId))
+            if (IsRegistered(entry.NodeId)) // check pending as well...
                 return null; // user with same id is already registered, deny
             
             int challenge = _rand.Next();

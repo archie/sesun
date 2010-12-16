@@ -1,0 +1,14 @@
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\Client.exe.manifest
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\Client.application
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\Client.exe
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\Client.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\PADIbookCommonLib.dll
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\bin\Debug\PADIbookCommonLib.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.ClientForm.resources
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.Properties.Resources.resources
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.csproj.GenerateResource.Cache
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.exe.manifest
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.application
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.exe
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Client\obj\Debug\Client.pdb

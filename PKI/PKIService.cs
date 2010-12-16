@@ -21,7 +21,7 @@ namespace PKI
         private Thread _outputThread;
         private System.Timers.Timer _cleanupTimer;
         private PKIServiceNodeToObject _pkiServiceObject;
-        private static RSACryptoServiceProvider _rsa;
+        public static RSACryptoServiceProvider _rsa;
         public static string PKIURI;
 
         public PKIService() 
@@ -133,6 +133,8 @@ namespace PKI
                         listUsers();
                     else if (inBuffer[0].Equals("pending"))
                         listPendingUsers();
+                    else if (inBuffer[0].Equals("key"))
+                        printPKIkeys();
                     else
                     {
                         Console.WriteLine("Invalid command.");
@@ -177,6 +179,13 @@ namespace PKI
                 Console.WriteLine("> " + e.NodeId + "\t" + e.Address);
             }
             Console.WriteLine("------------- End of list --------------");
+        }
+
+        private void printPKIkeys()
+        {
+            Console.WriteLine("---------------- Key -------------------");
+            Console.WriteLine(PKIService._rsa.ToXmlString(false));
+            Console.WriteLine("----------------------------------------");
         }
 
     }

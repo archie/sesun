@@ -1,0 +1,13 @@
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\Server.Properties.Resources.resources
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\Server.ServerForm.resources
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\Server.csproj.GenerateResource.Cache
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\Server.exe
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\Server.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\PADIbookCommonLib.dll
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\PKI.exe
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\PADIbookCommonLib.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\PKI.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\bin\Debug\PKI.xml
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\Server.exe
+C:\Users\aknahs\Documents\Development\SIRS\sesun\Server\obj\Debug\Server.pdb

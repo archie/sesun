@@ -26,5 +26,10 @@ namespace PADIbookCommonLib
             set { _lowestId = value; }
         }
 
+        override public string ToString()
+        {
+            return Name + Uris.ElementAt(0) + ContactingServerUri.ElementAt(0) + LowestId + Id.ToString();
+        }
+
     }
 }

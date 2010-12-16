@@ -1,0 +1,5 @@
+C:\Users\aknahs\Documents\Development\SIRS\sesun\PADIbookCommonLib\bin\Debug\PADIbookCommonLib.dll
+C:\Users\aknahs\Documents\Development\SIRS\sesun\PADIbookCommonLib\bin\Debug\PADIbookCommonLib.pdb
+C:\Users\aknahs\Documents\Development\SIRS\sesun\PADIbookCommonLib\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\aknahs\Documents\Development\SIRS\sesun\PADIbookCommonLib\obj\Debug\PADIbookCommonLib.dll
+C:\Users\aknahs\Documents\Development\SIRS\sesun\PADIbookCommonLib\obj\Debug\PADIbookCommonLib.pdb

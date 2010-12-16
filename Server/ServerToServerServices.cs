@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Security.Cryptography;
 using PADIbookCommonLib;
 using System.Windows.Forms;
 
@@ -71,7 +72,30 @@ namespace Server
             changedel.BeginInvoke(name, primary, null, null);
         }
 
-        public void shareObject(QueryByFile query)
+        private bool queryIsVerified(SignedQueryByFile signedQuery)
+        {
+            RSACryptoServiceProvider rsaWithPublicKeyOfRemoteUser = new RSACryptoServiceProvider();
+            String contactingName = "didnt find";
+            foreach (Friend f in ServerApp._user.Friends)
+            {
+                if (f.Uris.ElementAt(0).CompareTo(signedQuery.Query.ContactingServerUri.ElementAt(0)) == 0)
+                {
+                    contactingName = f.Name;
+                }
+            }
+            MessageBox.Show(ServerApp._user.Username + "says that signedQuery.Query.Name=" + contactingName);
+            UserEntry userToVerify = ServerApp._pkiCommunicator.GetVerifiedUserPublicKey(contactingName);
+            if (userToVerify == null)
+            {
+                MessageBox.Show(ServerApp._user.Username + " : User to verify was null!");
+                return false;
+            }
+            rsaWithPublicKeyOfRemoteUser.FromXmlString(userToVerify.PubKey);
+            byte[] data = Encoding.Default.GetBytes(signedQuery.Query.ToString());
+            return rsaWithPublicKeyOfRemoteUser.VerifyData(data, "SHA1", signedQuery.Signature);
+        }
+
+        public void shareObject(SignedQueryByFile signedQuery)
         {
             RemoteAsyncShareObjectDelegate del;
             ServerToServerServices friend;
@@ -81,7 +105,7 @@ namespace Server
             int i, j,counting;
             QueryByFile q1, q2;
             Boolean sendMessage = false;
-
+            QueryByFile query = signedQuery.Query;
 
             MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
 
@@ -92,6 +116,12 @@ namespace Server
             }
 
             contacting.Add(ServerApp._myUri);
+
+            if (!queryIsVerified(signedQuery))
+            {
+                MessageBox.Show("Could not verify signed query.");
+                return;
+            }
             ServerApp._user.ReceivedFileMessages.Add(query);
 
             //Checks if it has received #predecessors/2 answers, if so it responds and stores Datetime on sentMessages
@@ -184,9 +214,13 @@ namespace Server
 
                                     q1 = new QueryByFile(query.Name, query.Uris, contacting,
                                         (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username,query.Id);
+                                    
+                                    byte[] data = Encoding.Default.GetBytes(q1.ToString());
+                                    byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
+                                    SignedQueryByFile signedForwardQuery = new SignedQueryByFile(q1, signature);
 
                                     del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
-                                    del.BeginInvoke(q1, null, null);
+                                    del.BeginInvoke(signedForwardQuery, null, null);
                                 }
                             }
                         }
@@ -201,7 +235,7 @@ namespace Server
                 MessageBox.Show(ServerApp._user.Username + " : Still not enough messages to do consensus.");
             }
 
-            MessageBox.Show("MARCUS owns c#" + ServerApp._user.ReceivedFileMessages.Count(x => x.Id.Equals(query.Id)));
+            //MessageBox.Show("MARCUS owns c#" + ServerApp._user.ReceivedFileMessages.Count(x => x.Id.Equals(query.Id)));
             //ServerApp._user.ReceivedMessages.Add(nounce);
 
             //MessageBox.Show(ServerApp._myUri + " testing " + file.FileName[0] + " vs " + ServerApp._user.Username[0]);
