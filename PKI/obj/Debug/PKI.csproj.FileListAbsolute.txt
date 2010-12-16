@@ -1,7 +1,0 @@
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\bin\Debug\PKI.exe
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\bin\Debug\PKI.pdb
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\bin\Debug\PADIbookCommonLib.dll
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\bin\Debug\PADIbookCommonLib.pdb
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\obj\Debug\PKI.exe
-C:\Users\aknahs\Documents\Development\SIRS\sesun\PKI\obj\Debug\PKI.pdb
