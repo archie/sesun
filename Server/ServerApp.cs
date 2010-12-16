@@ -90,13 +90,19 @@ namespace Server
             _form = new ServerForm(_myUri);
 
             /* PKI Communication */
-            _pkiCommunicator = new NodePKIHelper(_rsaProvider, args[1]);
+            RSACryptoServiceProvider rsaPki = null;
+            if ((rsaPki = readRSAPKI()) == null)
+            {
+                MessageBox.Show("Couldn't load pubkey of PKI.");
+                Application.Exit();
+            }
+            _pkiCommunicator = new NodePKIHelper(_rsaProvider, rsaPki, args[1]);
             _myUserEntry = new UserEntry();
             _myUserEntry.NodeId = _user.Username;
             _myUserEntry.Address = _myUri;
             _myUserEntry.PubKey = _rsaProvider.ToXmlString(true);
             
-            if (_pkiCommunicator.Register(me))
+            if (_pkiCommunicator.Register(_myUserEntry))
             {
                 Application.Run(_form);
             }
@@ -105,6 +111,23 @@ namespace Server
                 Application.Exit();
             }
             
+        }
+
+        private static RSACryptoServiceProvider readRSAPKI()
+        {
+            RSACryptoServiceProvider rsapki = new RSACryptoServiceProvider();
+            // we assume all nodes get this in a secure way have this
+            try
+            {
+                TextReader tr = new StreamReader(".\\pki_pub.xml");
+                rsapki.FromXmlString(tr.ReadToEnd());
+                tr.Close();
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+            return rsapki;
         }
 
         private static void loadRPCServices(string[] args)

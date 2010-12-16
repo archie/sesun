@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
@@ -18,17 +19,10 @@ namespace PKI
         private const int PKI_PORT = 50000;
         private ConsoleThread _output;
         private Thread _outputThread;
-        private int _beep = 0;
-
+        private System.Timers.Timer _cleanupTimer;
+        private PKIServiceNodeToObject _pkiServiceObject;
         private static RSACryptoServiceProvider _rsa;
-
-        private string _pkiURI;
-
-        public string PkiURI
-        {
-            get { return _pkiURI; }
-            set { _pkiURI = value; }
-        }
+        public static string PKIURI;
 
         public PKIService() 
         {
@@ -45,27 +39,28 @@ namespace PKI
             ChannelServices.RegisterChannel(channel, true);
             RemotingConfiguration.RegisterWellKnownServiceType(typeof(PKIServiceNodeToObject),
                     "PKIService", WellKnownObjectMode.Singleton);
-            PkiURI = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
+            PKIURI = (((ChannelDataStore)channel.ChannelData).ChannelUris)[0];
 
-            Console.WriteLine("PKI Service at: " + PkiURI);
+            Console.WriteLine("PKI Service at: " + PKIURI);
+
+            _pkiServiceObject = (PKIServiceNodeToObject)Activator.GetObject(
+                typeof(PKIServiceNodeToObject), PKIService.PKIURI + "/PKIService");
+
+            _cleanupTimer = new System.Timers.Timer(10000); // perform cleanup and beep every 10s
+            _cleanupTimer.Elapsed += new ElapsedEventHandler(periodicCleanupOfPendingUsers);
+            _cleanupTimer.Start();
 
             while (true) 
             {
                 if (!_outputThread.IsAlive)
                     break;
-
-                beep();
             }
         }
 
-        private void beep()
+        private void periodicCleanupOfPendingUsers(object sender, ElapsedEventArgs events)
         {
-            _beep++;
-            if (_beep % 100000000 == 0)
-            {
-                Console.WriteLine(".");
-                _beep = 0;
-            }
+            _pkiServiceObject.EmptyPendingUsers();
+            Console.Write(".");
         }
 
         public static SignedEntry sign(UserEntry ue)
@@ -77,7 +72,6 @@ namespace PKI
             signedEntry.Signature = _rsa.SignData(data, "SHA1");
 
             return signedEntry;
-            
         }
 
         private static void loadRsaProvider()
@@ -85,7 +79,7 @@ namespace PKI
             _rsa = new RSACryptoServiceProvider();
             try
             {
-                Console.WriteLine("PKI Public Key exists, loading to memory.");
+                Console.WriteLine("PKI Public+Private Key exists, loading to memory.");
                 TextReader tr = new StreamReader(".\\pki.xml");
                 _rsa.FromXmlString(tr.ReadToEnd());
                 tr.Close();
@@ -96,6 +90,7 @@ namespace PKI
                 TextWriter tw = new StreamWriter(".\\pki.xml");
                 tw.Write(_rsa.ToXmlString(true));
                 tw.Close();
+                
 
                 tw = new StreamWriter(".\\pki_pub.xml");
                 tw.Write(_rsa.ToXmlString(false));
@@ -136,6 +131,12 @@ namespace PKI
                         break;
                     else if (inBuffer[0].Equals("list"))
                         listUsers();
+                    else if (inBuffer[0].Equals("pending"))
+                        listPendingUsers();
+                    else
+                    {
+                        Console.WriteLine("Invalid command.");
+                    }
 
                     inBuffer.RemoveAt(0);
 
@@ -156,7 +157,26 @@ namespace PKI
 
         private void listUsers()
         {
-            Console.WriteLine("Want to list all users here... not yet sure how.");
+            PKIServiceNodeToObject pkiService = (PKIServiceNodeToObject)Activator.GetObject(
+                typeof(PKIServiceNodeToObject), PKIService.PKIURI + "/PKIService");
+            Console.WriteLine("------------ List of users -------------");
+            foreach (UserEntry e in pkiService.GetUserDatabase())
+            {
+                Console.WriteLine("> " + e.NodeId + "\t" + e.Address);
+            }
+            Console.WriteLine("------------- End of list --------------");
+        }
+
+        private void listPendingUsers()
+        {
+            PKIServiceNodeToObject pkiService = (PKIServiceNodeToObject)Activator.GetObject(
+                typeof(PKIServiceNodeToObject), PKIService.PKIURI + "/PKIService");
+            Console.WriteLine("-------- List of pending users ---------");
+            foreach (UserEntry e in pkiService.GetPendingUserDatabase())
+            {
+                Console.WriteLine("> " + e.NodeId + "\t" + e.Address);
+            }
+            Console.WriteLine("------------- End of list --------------");
         }
 
     }

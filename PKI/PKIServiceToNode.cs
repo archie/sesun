@@ -11,23 +11,49 @@ namespace PKI
     class PKIServiceNodeToObject : MarshalByRefObject, PKIServices
     {
         private LinkedList<UserEntry> userDB;
-        private Dictionary<UserEntry, byte[]> waitingChallenge;
+        private Dictionary<UserEntry, PendingChallenge> waitingChallenge;
         private Random _rand;
+
+        class PendingChallenge
+        {
+            public PendingChallenge(byte[] challenge, DateTime sent)
+            {
+                this._challenge = challenge;
+                this._sent = sent;
+            }
+            byte[] _challenge;
+            DateTime _sent;
+            public byte[] Challenge
+            {
+                get { return _challenge; }
+            }
+            public DateTime Sent
+            {
+                get { return _sent; }
+            }
+        }
 
         public PKIServiceNodeToObject()
         {
             _rand = new Random(DateTime.Now.Millisecond);
-            waitingChallenge = new Dictionary<UserEntry, byte[]>();
+            waitingChallenge = new Dictionary<UserEntry, PendingChallenge>();
             userDB = new LinkedList<UserEntry>();
         }
 
         public byte[] Register(UserEntry entry)
         {
             Console.WriteLine("Got register request from: " + entry.NodeId);
+            
+            if (IsRegistered(entry.NodeId))
+                return null; // user with same id is already registered, deny
+            
             int challenge = _rand.Next();
             byte[] rawChallenge = Encoding.Default.GetBytes(challenge.ToString());
-            waitingChallenge.Add(entry, rawChallenge);
+            PendingChallenge pc = new PendingChallenge(rawChallenge, DateTime.Now);
+            waitingChallenge.Add(entry, pc);
+
             Console.WriteLine("Added <" + entry.NodeId + "," + challenge + ">");
+
             return rawChallenge;
         }
 
@@ -55,7 +81,7 @@ namespace PKI
 
             try
             {
-                if (rsa.VerifyData(waitingChallenge[pendingUser], "SHA1", response.Signature))
+                if (rsa.VerifyData(waitingChallenge[pendingUser].Challenge, "SHA1", response.Signature))
                 {
                     Console.WriteLine("Received response matches the challenge sent. " +
                         "(Verified with " + response.Sender + " public key)");
@@ -95,6 +121,23 @@ namespace PKI
             return null;
         }
 
-        
+        public LinkedList<UserEntry> GetUserDatabase()
+        {
+            return userDB;
+        }
+
+        public LinkedList<UserEntry> GetPendingUserDatabase()
+        {
+            return new LinkedList<UserEntry>(waitingChallenge.Keys);
+        }
+
+        public void EmptyPendingUsers()
+        {
+            foreach (UserEntry e in waitingChallenge.Keys)
+            {
+                if (waitingChallenge[e].Sent.AddSeconds(10) > DateTime.Now)
+                    waitingChallenge.Remove(e);
+            }
+        }
     }
 }
