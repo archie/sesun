@@ -18,6 +18,7 @@ namespace Server
     {
 
         public static User _user;
+        public static UserEntry _myUserEntry;
 
         private static RSACryptoServiceProvider _rsaProvider;
         private static NodePKIHelper _pkiCommunicator;
@@ -88,12 +89,12 @@ namespace Server
             
             _form = new ServerForm(_myUri);
 
+            /* PKI Communication */
             _pkiCommunicator = new NodePKIHelper(_rsaProvider, args[1]);
-            
-            UserEntry me = new UserEntry();
-            me.NodeId = _user.Username;
-            me.Address = _myUri;
-            me.PubKey = _rsaProvider.ToXmlString(true);
+            _myUserEntry = new UserEntry();
+            _myUserEntry.NodeId = _user.Username;
+            _myUserEntry.Address = _myUri;
+            _myUserEntry.PubKey = _rsaProvider.ToXmlString(true);
             
             if (_pkiCommunicator.Register(me))
             {
