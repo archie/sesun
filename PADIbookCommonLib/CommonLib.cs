@@ -47,7 +47,7 @@ namespace PADIbookCommonLib
     public delegate void RemoteAsyncRefreshFriendsDelegate();
     //public delegate void RemoteAsyncLookupSexAgeDelegate(QueryByGenderAge q);
     public delegate void RemoteAsyncGetNameDelegate(String uri);
-    public delegate void RemoteAsyncShareObjectDelegate(ObjectFile file, String uri, DateTime nounce, String contactingUri, String lowest);
+    public delegate void RemoteAsyncShareObjectDelegate(SignedQueryByFile query);
     public delegate void RemoteAsyncChangeFriendUriDelegate(string oldUri, string newUri);
     //public delegate void RemoteAsyncLookupInterestDelegate(QueryByInterest q);
     public delegate void RemoteAsyncServiceUnavailableDelegate();
@@ -85,7 +85,7 @@ namespace PADIbookCommonLib
         void lookupNameResponse(String name, String uri, List<RedirectionFile> redList);
         void changeNameOfFriend(String name,String primary);
         void getName(String responseUri);
-        void shareObject(ObjectFile file, String uri, DateTime nounce, String contactingUri, String lowest);
+        void shareObject(SignedQueryByFile query);
         //void lookupSexAge(QueryByGenderAge q);
         //void lookupSexAgeResponse(QueryByGenderAge q);
         void changeFriendUri(string oldFriendUri, string newFriendUri);
@@ -125,10 +125,7 @@ namespace PADIbookCommonLib
         void lookupNameResponse(String name, String uri, List<RedirectionFile> redList);
         void refreshFriends();
         void changeNameOfFriend(String name, String primary);
-        void lookupSexAgeResponse(QueryByGenderAge q);
-        void lookupGeneralRingResponse(QueryByInterest q);
         void serviceUnavailable();
-        void lookupInterestResponse(QueryByInterest q);
     }
 
     /* PKI SERVICE DELEGATES */

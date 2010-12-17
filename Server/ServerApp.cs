@@ -20,8 +20,8 @@ namespace Server
         public static User _user;
         public static UserEntry _myUserEntry;
 
-        private static RSACryptoServiceProvider _rsaProvider;
-        private static NodePKIHelper _pkiCommunicator;
+        public static RSACryptoServiceProvider _rsaProvider;
+        public static NodePKIHelper _pkiCommunicator;
 
         private static System.Timers.Timer _freezeTimer;
 

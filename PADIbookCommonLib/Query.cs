@@ -12,6 +12,9 @@ namespace PADIbookCommonLib
         private List<string> _contactingServerUri;
         private List<string> _uris;
         private String _name;
+        
+
+        public Query() { }
 
         public String Name
         {
@@ -42,18 +45,18 @@ namespace PADIbookCommonLib
             _id = DateTime.Now;
         }
 
-        public Query(List<string> uris, List<string> contactingServerUri)
+        public Query(List<string> uris, List<string> contactingServerUri,DateTime id)
         {
             _uris = uris;
             _contactingServerUri = contactingServerUri;
-            _id = DateTime.Now;
+            _id = id;
             _name = "";
         }
-        public Query(String name, List<string> uris, List<string> contactingServerUri)
+        public Query(String name, List<string> uris, List<string> contactingServerUri,DateTime id)
         {
             _uris = uris;
             _contactingServerUri = contactingServerUri;
-            _id = DateTime.Now;
+            _id = id;
             _name = name;
         }
     }

@@ -19,8 +19,6 @@ namespace Client
 
     public delegate void UpdateTextBoxesDelegate();
     public delegate void UpdateLookupNameDelegate(String name, String uri, List<RedirectionFile> redList);
-    public delegate void UpdateLookupSexAgeDelegate(QueryByGenderAge q);
-    public delegate void UpdateLookupInterestDelegate(QueryByInterest q);
 
     public partial class ClientForm : Form
     {
@@ -133,17 +131,7 @@ namespace Client
                 this.lookupResultTextBox.Text += red.FileNameHash + " @ "+ red.Uri + ")\r\n";
         }
 
-        public void refreshLookupSexAge(QueryByGenderAge q)
-        {
-            this.lookupResultTextBox.Text += q.Name + " ( " + q.ContactingServerUri.ElementAt(0) + ")\r\n";
-        }
-
-        public void refreshLookupInterest(QueryByInterest q)
-        {
-            this.lookupResultTextBox.Text += q.Name + " ( " + q.ContactingServerUri.ElementAt(0) + ")\r\n";
-        }
-
-        public void sortAndAddPostList(List<Post> lista)
+          public void sortAndAddPostList(List<Post> lista)
         {
             Dictionary<DateTime, Post> sorted = new Dictionary<DateTime, Post>();
             List<DateTime> dlist = new List<DateTime>();
@@ -515,7 +503,7 @@ namespace Client
             try
             {
                 string friendUri = friendsAddUriText.Text;
-                new Uri(friendUri);
+                //new Uri(friendUri);
 
                 RemoteAsyncUriDelegate del = new RemoteAsyncUriDelegate(_server.sendFriendRequest);
                 del.BeginInvoke(friendUri, null, null);
@@ -601,7 +589,7 @@ namespace Client
         private void lookupNameButton_Click_1(object sender, EventArgs e)
         {
             this.lookupResultTextBox.Clear();
-            QueryByName q = new QueryByName(this.lookupName.Text, new List<String>(), new List<String>());
+            QueryByName q = new QueryByName(this.lookupName.Text, new List<String>(), new List<String>(),DateTime.Now);
             RemoteAsyncLookupNameDelegate del = new RemoteAsyncLookupNameDelegate(_server.lookupname);
             del.BeginInvoke(q, null, null);/*TODO CALLBACK*/
         }

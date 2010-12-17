@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
 using System.IO;
+using System.Windows.Forms;
 using System.Threading;
 
 namespace PADIbookCommonLib
@@ -56,17 +57,20 @@ namespace PADIbookCommonLib
                 new RemoteAsyncGetPubKeyDelegate(pki.GetPublicKey);
             response = pubkeyDelegate(userId);
 
+            MessageBox.Show("GetVerifiedUserPublicKey : Just receiveid userId = " + userId);
             if (response != null)
             {
                 // verify authenticity
                 byte[] data = Encoding.Default.GetBytes(response.Entry.ToString());
-
+                MessageBox.Show("GetVerifiedUserPublicKey : Response not null");
                 //Verify the hash and the signature
-                if (rsa.VerifyData(data, "SHA1", response.Signature))
+                if (pkiRsaProvider.VerifyData(data, "SHA1", response.Signature))
                 {
+                    MessageBox.Show("GetVerifiedUserPublicKey : was able to verify the response with: " + pkiRsaProvider.ToXmlString(false));
                     return response.Entry;
                 }
             }
+            MessageBox.Show("GetVerifiedUserPublicKey : Got to the end : response ==null || wasnt able to verify: " + pkiRsaProvider.ToXmlString(false));
             return null;
         }
 
