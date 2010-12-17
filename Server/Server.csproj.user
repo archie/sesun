@@ -1,7 +1,0 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartAction>Project</StartAction>
-    <StartArguments>58511 tcp://localhost:50000</StartArguments>
-    <StartWorkingDirectory>C:\Users\aknahs\Documents\Development\SIRS\sesun\</StartWorkingDirectory>
-  </PropertyGroup>
-</Project>
