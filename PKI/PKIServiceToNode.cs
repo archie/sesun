@@ -113,10 +113,14 @@ namespace PKI
 
         public SignedEntry GetPublicKey(string id)
         {
+            Console.WriteLine("Request for public key: " + id);
             foreach (UserEntry ue in userDB)
             {
                 if (ue.NodeId.Equals(id))
+                {
+                    Console.WriteLine("Returning user entry (with public key) for id: " + id);
                     return PKIService.sign(ue);
+                }
             }
             return null;
         }
