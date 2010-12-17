@@ -250,119 +250,16 @@ namespace Server
             remoteDel.BeginInvoke(ServerApp._user.Username, ServerApp._primaryURI, null, null);
         }
 
-        /*public void lookupSexAge(QueryByGenderAge q)
-        {
-            ServerToServerServices friend;
-            ServerToServerServices origin;
-            RemoteAsyncLookupSexAgeDelegate remoteDel;
-            RemoteAsyncLookupSexAgeDelegate remoteResDel;
-
-            QueryByGenderAge newQ = new QueryByGenderAge(q.Gender, q.Age, q.Uris, new List<string>());
-            newQ.ContactingServerUri.Clear();
-            newQ.ContactingServerUri.Add(ServerApp._primaryURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaTwoURI);
-
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
-            {
-                if (d.Equals(q.Id))
-                {
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(q.Id);
-
-            if (ServerApp._user.Gender.CompareTo(q.Gender) == 0 && ServerApp._user.Age == q.Age)
-            {
-                String i = q.Uris.ElementAt(0);
-                q.Name = ServerApp._user.Username;
-                origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                        i + "/" + ServicesNames.ServerToServerServicesName));
-                remoteResDel = new RemoteAsyncLookupSexAgeDelegate(origin.lookupSexAgeResponse);
-                remoteResDel.BeginInvoke(q, null, null);
-                //}
-            }
-
-            foreach (Friend i in ServerApp._user.Friends)
-            {
-                if (i.Uris.ElementAt(0) != null)
-                {
-                    if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
-                    {
-                        friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                            i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                        remoteDel = new RemoteAsyncLookupSexAgeDelegate(friend.lookupSexAge);
-                        remoteDel.BeginInvoke(newQ, null, null);
-                    }
-                }
-            }
-        }
-
-        public void lookupInterest(QueryByInterest q)
-        {
-            ServerToServerServices friend;
-            ServerToServerServices origin;
-            RemoteAsyncLookupInterestDelegate remoteDel;
-            RemoteAsyncLookupInterestDelegate remoteResDel;
-
-            QueryByInterest newQ = new QueryByInterest(ServerApp._user.Username,q.Interest,q.Uris,new List<string>());
-            newQ.ContactingServerUri.Clear();
-            newQ.ContactingServerUri.Add(ServerApp._primaryURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaTwoURI);
-
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
-            {
-                if (d.Equals(q.Id))
-                {
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(q.Id);
-            //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :O interesse a testar e" + q.Interest);
-
-            foreach (Interest i in ServerApp._user.Interests)
-            {
-                if (i.ToString().CompareTo(q.Interest) == 0)
-                {
-                    //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :Olha, tenho esse interesse! Que giro...");
-                    q.Name = ServerApp._user.Username;
-                    origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                            q.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                    remoteResDel = new RemoteAsyncLookupInterestDelegate(origin.lookupInterestResponse);
-                    remoteResDel.BeginInvoke(q, null, null);
-                }
-            }
-
-            foreach (Friend i in ServerApp._user.Friends)
-            {
-                if (i.Uris.ElementAt(0) != null)
-                {
-                    if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
-                    {
-                        //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : I'll send it whom I havent sent yet : " + i.Uris.ElementAt(0));
-                        friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                            i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                        remoteDel = new RemoteAsyncLookupInterestDelegate(friend.lookupInterest);
-                        remoteDel.BeginInvoke(newQ, null, null);
-                    }
-                    //else System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : I dont send to who sent it to me : " + i.Uris.ElementAt(0));
-                }
-            }
-        }*/
-
-        public void lookupname(QueryByName q)
+        public void lookupname(SignedQueryByName incomingQuery)
         {
             ServerToServerServices friend;
             ServerToServerServices origin;
             RemoteAsyncLookupNameDelegate remoteDel;
             RemoteAsyncLookupNameResponseDelegate remoteResDel;
-
+            QueryByName q = incomingQuery.Query;
             QueryByName newQ = new QueryByName(q.Name, q.Uris, new List<string>(),q.Id);
             newQ.ContactingServerUri.Clear();
             newQ.ContactingServerUri.Add(ServerApp._primaryURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //newQ.ContactingServerUri.Add(ServerApp._replicaTwoURI);
 
             foreach (Query qu in ServerApp._user.ReceivedNameMessages)
             {
@@ -374,6 +271,8 @@ namespace Server
             ServerApp._user.ReceivedNameMessages.Add(q);
             //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :O nome a testar e" + q.Name);
 
+            /* verify incoming q before sending response */ 
+
             if (ServerApp._user.Username.CompareTo(q.Name) == 0)
             {
                 //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + "@" + ServerApp._primaryURI + " :Olha e o meu nome");
@@ -381,8 +280,22 @@ namespace Server
                 origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                         i + "/" + ServicesNames.ServerToServerServicesName));
                 remoteResDel = new RemoteAsyncLookupNameResponseDelegate(origin.lookupNameResponse);
-                remoteResDel.BeginInvoke(ServerApp._user.Username,ServerApp._myUri,ServerApp._user.RedirectionList, null, null);
+
+                /* sign response */
+                string data = getResponseDataForHash();
+                byte[] bytestreamData = Encoding.Default.GetBytes(data);
+                byte[] responseSignature = ServerApp._rsaProvider.SignData(bytestreamData, "SHA1");
+                SignedLookupResponse signedLookupResponse =
+                    new SignedLookupResponse(ServerApp._user.Username, ServerApp._myUri, 
+                        ServerApp._user.RedirectionList, responseSignature);
+                remoteResDel.BeginInvoke(signedLookupResponse, null, null);
             }
+
+
+            /* sign the query which we send to our friends */
+            byte[] queryData = Encoding.Default.GetBytes(newQ.ToString());
+            byte[] signature = ServerApp._rsaProvider.SignData(queryData, "SHA1");
+            SignedQueryByName signedNewNameQuery = new SignedQueryByName(newQ, signature);
 
             foreach (Friend i in ServerApp._user.Friends)
             {
@@ -394,286 +307,33 @@ namespace Server
                         friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                             i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
                         remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);
-                        remoteDel.BeginInvoke(newQ, null, null);
+                        remoteDel.BeginInvoke(signedNewNameQuery, null, null);
                     }
-                    //else System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Nao mando a quem me enviou : " + i.Uris.ElementAt(0));
+                    
                 }
             }
         }
 
-        /*TODO : por a funcionar de maneira diferente pois faz efeito tampao
-        public void lookupGeneralRing(QueryByInterest q)
+        private string getResponseDataForHash()
         {
-            ServerToServerServices friend;
-            ServerToServerServices origin;
-            RemoteAsyncLookupInterestDelegate remoteDel;
-            RemoteAsyncLookupInterestDelegate remoteResDel;
+            string data = ServerApp._user.Username + ServerApp._myUri;
+            foreach (RedirectionFile f in ServerApp._user.RedirectionList)
+                data += f.ToString();
+            return data;
+        }
 
-            QueryByInterest newQ = new QueryByInterest(q.Interest, q.Uris, new List<string>());
-            newQ.ContactingServerUri.Clear();
-            newQ.Name = ServerApp._user.Username;
-            newQ.ContactingServerUri.Add(ServerApp._primaryURI);
-            newQ.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            newQ.ContactingServerUri.Add(ServerApp._replicaTwoURI);
-
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
-            {
-                if (d.Equals(q.Id))
-                {
-                    System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :Mensagem repetida");
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(q.Id);
-
-            if (ServerApp._user.IsRegisteredInAnelGeral)
-            {
-                System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : estou registado, vou responder");
-                String i = q.Uris.ElementAt(0);
-                origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                        i + "/" + ServicesNames.ServerToServerServicesName));
-                remoteResDel = new RemoteAsyncLookupInterestDelegate(origin.lookupGeneralRingResponse);
-                remoteResDel.BeginInvoke(newQ, null, null);
-            }
-            else
-            {
-                foreach (Friend i in ServerApp._user.Friends)
-                {
-                    if (i.Uris.ElementAt(0) != null)
-                    {
-                        if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
-                        {
-                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou enviar a quem ainda n enviei : " + i.Uris.ElementAt(0));
-                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                            remoteDel = new RemoteAsyncLookupInterestDelegate(friend.lookupGeneralRing);
-                            remoteDel.BeginInvoke(newQ, null, null);
-                        }
-                        else System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Nao mando a quem me enviou : " + i.Uris.ElementAt(0));
-                    }
-                }
-            }
-        }*/
-
-        public void lookupNameResponse(String name, String uri, List<RedirectionFile> redList)
+        public void lookupNameResponse(SignedLookupResponse signedResponse)
         {
+            /* verify before */
+            string name = signedResponse.Username;
+            string uri = signedResponse.Uri;
+            List<RedirectionFile> redList = signedResponse.FileList;
             //System.Windows.Forms.MessageBox.Show("lookupNameResponse");
             ClientServices cliente = (ClientServices)Activator.GetObject(
                 typeof(ClientServices),
                 ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
             cliente.lookupNameResponse(name,uri,redList);
         }
-
-        /*public void lookupInterestResponse(QueryByInterest q)
-        {
-            //System.Windows.Forms.MessageBox.Show("lookupInterestResponse");
-            ClientServices cliente = (ClientServices)Activator.GetObject(
-                typeof(ClientServices),
-                ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
-            cliente.lookupInterestResponse(q);
-        }*/
-
-        //TODO : paper says this doesnt exist
-        /*public void lookupGeneralRingResponse(QueryByInterest q)
-        {
-
-            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : " + q.Name + " is in the lookupGr! Uri = " + q.ContactingServerUri.ElementAt(0));
-            MessageRegister message = new MessageRegister(ServerApp._user.Username, new List<String>(), new List<String>());
-            Boolean found;
-            ServerToServerServices friend;
-            RemoteAsyncRegisterInterestInRingDelegate remoteDel;
-
-
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
-            {
-                if (d.Equals(q.Id))
-                {
-                    System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :Mensagem repetida");
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(q.Id);
-
-            message.ContactingServerUri.Add(ServerApp._primaryURI);
-            message.Uris.Add(ServerApp._primaryURI);
-            message.Name = ServerApp._user.Username;
-
-            found = false;
-
-            foreach (Interest i in ServerApp._user.Interests)
-            {
-                found = false;
-                foreach (RegisteredInterest r in ServerApp._user.RegInterests)
-                {
-                    //TODO acabar o registo de interesses
-                    if (i.Equals(r.Interest))
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    message.Interests.Add(i);
-            }
-
-            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou mandar os interesses por reg para o anel : " + q.Name);
-            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                 q.ContactingServerUri.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-            remoteDel = new RemoteAsyncRegisterInterestInRingDelegate(friend.registerInterestInRing);
-            remoteDel.BeginInvoke(message, null, null);
-
-            //TODO : register no interesse
-        }*/
-
-        /*public void ChangeInterestRingFriends(MessageInsertRing message)
-        {
-            Boolean found = false;
-            RegisteredInterest reg = new RegisteredInterest(message.Interest, message.Before, message.After);
-            foreach (RegisteredInterest r in ServerApp._user.RegInterests)
-            {
-                if (r.Interest.Equals(message.Interest))
-                {
-                    if (message.Actualize == 1)
-                    {
-                        r.RingBeforeUri = message.Before;
-                        return;
-                    }
-                    found = true;
-                    break;
-                }
-            }
-            if(found==false)
-                ServerApp._user.RegInterests.Add(reg);
-        }
-        public void ChangeGeneralRingFriends(MessageInsertRing message)
-        {//se nao tiver la
-        }
-
-        public void registerInterestInRing(MessageRegister message)
-        {
-            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + ": recebi uma messageRegister de " + message.Name);
-            Boolean found;
-            String nextUriAux;
-            List<Interest> newInter = new List<Interest>();
-            MessageInsertRing mreg;
-            ServerToServerServices friend;
-            RemoteAsynChangeRingDelegate remoteDel;
-            RemoteAsynChangeRingDelegate remoteDel2;
-            RemoteAsyncRegisterInterestInRingDelegate remoteDel3;
-
-            foreach (DateTime d in ServerApp._user.ReceivedMessages)
-            {
-                if (d.Equals(message.Id)) //JA DEU A VOLTA
-                {
-                    System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :Percorreu o Anel inteiro = ja deu a volta!");
-
-                    Os interesses que sobrarem ele que se amanhe
-                    foreach (Interest i in message.Interests)
-                    {
-                        //diz para criar o anel em q ta sozinho
-                        mreg = new MessageInsertRing(2, i, message.Uris.ElementAt(0), message.Uris.ElementAt(0), ServerApp._user.Username, new List<string>(), new List<string>());
-                        mreg.Uris.Add(ServerApp._primaryURI);
-                        mreg.ContactingServerUri.Add(ServerApp._primaryURI);
-
-                        friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                         message.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                        remoteDel = new RemoteAsynChangeRingDelegate(friend.ChangeInterestRingFriends);
-                        remoteDel.BeginInvoke(mreg, null, null);
-
-                        //diz para se inscrever no anel geral logo a seguir a si
-                        mreg = new MessageInsertRing(2, i, ServerApp._primaryURI, ServerApp._user.AnelGeralUris.ElementAt(1), ServerApp._user.Username, new List<string>(), new List<string>());
-                        mreg.Uris.Add(ServerApp._primaryURI);
-                        mreg.ContactingServerUri.Add(ServerApp._primaryURI);
-
-                        friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                         message.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                        remoteDel = new RemoteAsynChangeRingDelegate(friend.ChangeGeneralRingFriends);
-                        remoteDel.BeginInvoke(mreg, null, null);
-                    }
-                    return;
-                }
-            }
-            ServerApp._user.ReceivedMessages.Add(message.Id);
-
-            foreach (Interest i in message.Interests)
-            {
-                found = false;
-                foreach (RegisteredInterest r in ServerApp._user.RegInterests)
-                {
-                    //TODO acabar o registo de interesses
-                    if (i.Equals(r.Interest))
-                    {
-                        if (r.RingNextUri.CompareTo(ServerApp._primaryURI) != 0) nao esta sozinho no anel
-                        {
-                            nextUriAux = r.RingNextUri; ;
-                            r.RingNextUri = message.Uris.ElementAt(0);
-
-                            mreg = new MessageInsertRing(2, i, ServerApp._primaryURI, nextUriAux, ServerApp._user.Username, new List<string>(), new List<string>());
-                            mreg.Uris.Add(ServerApp._primaryURI);
-                            mreg.ContactingServerUri.Add(ServerApp._primaryURI);
-
-                            /*Server Uri(0) regista como before ServerApp.primary
-                            /*              regista como after nexUriAux
-                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou dizer ao " + message.Name +
-                                "para por o seu before para " + mreg.Before + "e o seu next para : " + mreg.After);
-
-                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                 message.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                            remoteDel = new RemoteAsynChangeRingDelegate(friend.ChangeInterestRingFriends);
-                            remoteDel.BeginInvoke(mreg, null, null);
-
-                            /*tem de contactar o nextUriAux para actualizar o before dele com o uri do server uri(0)
-                            mreg = new MessageInsertRing(1, i, message.Uris.ElementAt(0), message.Name, ServerApp._user.Username, new List<string>(), new List<string>());
-                            mreg.Uris.Add(ServerApp._primaryURI);
-                            mreg.ContactingServerUri.Add(ServerApp._primaryURI);
-
-                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                 nextUriAux + "/" + ServicesNames.ServerToServerServicesName));
-                            remoteDel2 = new RemoteAsynChangeRingDelegate(friend.ChangeInterestRingFriends);
-                            remoteDel2.BeginInvoke(mreg, null, null);
-                        }
-                        else /*Era o unico no anel
-                        {
-                            r.RingBeforeUri = message.Uris.ElementAt(0);
-                            r.RingNextUri = message.Uris.ElementAt(0);
-
-                            mreg = new MessageInsertRing(2, i, ServerApp._primaryURI, ServerApp._primaryURI, ServerApp._user.Username, new List<string>(), new List<string>());
-                            mreg.Uris.Add(ServerApp._primaryURI);
-                            mreg.ContactingServerUri.Add(ServerApp._primaryURI);
-
-                            /*Server Uri(0) regista como before ServerApp.primary
-                            /*              regista como after ServerApp.primary
-                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou dizer ao " + message.Name +
-                                "para por o seu before para " + mreg.Before + "e o seu next para : " + mreg.After);
-
-                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                 message.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                            remoteDel = new RemoteAsynChangeRingDelegate(friend.ChangeInterestRingFriends);
-                            remoteDel.BeginInvoke(mreg, null, null);
-                        }
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    newInter.Add(i); //Assim so os que nao adicionou ao ring é que continuam pelo anel geral a procura
-            }
-
-            message.Interests = newInter;
-            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou mandar os interesses por reg para o anel : " + ServerApp._user.AnelGeralUris.ElementAt(1));
-            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                 ServerApp._user.AnelGeralUris.ElementAt(1) + "/" + ServicesNames.ServerToServerServicesName));
-            remoteDel3 = new RemoteAsyncRegisterInterestInRingDelegate(friend.registerInterestInRing);
-            remoteDel3.BeginInvoke(message, null, null);
-        }*/
-
-        /*public void lookupSexAgeResponse(QueryByGenderAge q)
-        {
-            ClientServices cliente = (ClientServices)Activator.GetObject(
-                typeof(ClientServices),
-                ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
-            cliente.lookupSexAgeResponse(q);
-        }*/
 
         public Friend acceptFriendRequest(Friend friend)
         {

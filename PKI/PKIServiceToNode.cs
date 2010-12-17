@@ -143,5 +143,10 @@ namespace PKI
                     waitingChallenge.Remove(e);
             }
         }
+
+        public void ClearDatabase()
+        {
+            userDB.Clear();
+        }
     }
 }

@@ -33,5 +33,9 @@ namespace PADIbookCommonLib
         {
         }
 
+        public override string ToString()
+        {
+            return FileNameHash + Uri;
+        }
     }
 }

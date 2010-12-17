@@ -57,12 +57,11 @@ namespace PADIbookCommonLib
                 new RemoteAsyncGetPubKeyDelegate(pki.GetPublicKey);
             response = pubkeyDelegate(userId);
 
-            MessageBox.Show("GetVerifiedUserPublicKey : Just receiveid userId = " + userId);
             if (response != null)
             {
                 // verify authenticity
                 byte[] data = Encoding.Default.GetBytes(response.Entry.ToString());
-                MessageBox.Show("GetVerifiedUserPublicKey : Response not null");
+
                 //Verify the hash and the signature
                 if (pkiRsaProvider.VerifyData(data, "SHA1", response.Signature))
                 {

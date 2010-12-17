@@ -75,8 +75,10 @@
     <Compile Include="RedirectionFile.cs" />
     <Compile Include="RegisteredInterest.cs" />
     <Compile Include="SignedEntry.cs" />
+    <Compile Include="SignedLookupResponse.cs" />
     <Compile Include="SignedMessage.cs" />
     <Compile Include="SignedQueryByFile.cs" />
+    <Compile Include="SignedQueryByName.cs" />
     <Compile Include="User.cs" />
     <Compile Include="UserEntry.cs" />
   </ItemGroup>

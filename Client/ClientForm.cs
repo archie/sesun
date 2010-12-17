@@ -590,7 +590,7 @@ namespace Client
         {
             this.lookupResultTextBox.Clear();
             QueryByName q = new QueryByName(this.lookupName.Text, new List<String>(), new List<String>(),DateTime.Now);
-            RemoteAsyncLookupNameDelegate del = new RemoteAsyncLookupNameDelegate(_server.lookupname);
+            RemoteAsyncLookupNameClientDelegate del = new RemoteAsyncLookupNameClientDelegate(_server.lookupname);
             del.BeginInvoke(q, null, null);/*TODO CALLBACK*/
         }
 

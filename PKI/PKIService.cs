@@ -135,6 +135,8 @@ namespace PKI
                         listPendingUsers();
                     else if (inBuffer[0].Equals("key"))
                         printPKIkeys();
+                    else if (inBuffer[0].Equals("clear"))
+                        clearDatabase();
                     else
                     {
                         Console.WriteLine("Invalid command.");
@@ -167,6 +169,14 @@ namespace PKI
                 Console.WriteLine("> " + e.NodeId + "\t" + e.Address);
             }
             Console.WriteLine("------------- End of list --------------");
+        }
+
+        private void clearDatabase()
+        {
+            PKIServiceNodeToObject pkiService = (PKIServiceNodeToObject)Activator.GetObject(
+                typeof(PKIServiceNodeToObject), PKIService.PKIURI + "/PKIService");
+            pkiService.ClearDatabase();
+            Console.WriteLine("Cleared user database.");
         }
 
         private void listPendingUsers()

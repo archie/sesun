@@ -108,6 +108,8 @@ namespace Server
             
             if (_pkiCommunicator.Register(_myUserEntry))
             {
+                UserEntry check = _pkiCommunicator.GetVerifiedUserPublicKey("3-0");
+                MessageBox.Show("Checkin... " + check.Address + " KEY : " + check.PubKey);
                 Application.Run(_form);
             }
             else

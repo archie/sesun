@@ -54,21 +54,7 @@ namespace Server
                 return null;
             }
 
-            //string[] replicasURIs = { ServerApp._replicaOneURI, ServerApp._replicaTwoURI };
-            //ReplicationServices replica;
-            //RemoteAsyncPostDelegate remoteDel;
-
             ServerApp._user.addPost(post);
-
-            /*foreach (string uri in replicasURIs)
-            {
-                if (uri != null)
-                {
-                    replica = ((ReplicationServices)Activator.GetObject(typeof(ReplicationServices), uri + "/" + ServicesNames.ReplicationServicesName));
-                    remoteDel = new RemoteAsyncPostDelegate(replica.sendPost);
-                    remoteDel.BeginInvoke(post, null, null);
-                }
-            }*/
 
             return post;
         }
@@ -143,12 +129,11 @@ namespace Server
 
             //One of this is the response uri and the other is the previous uri
             q.Uris.Add(ServerApp._primaryURI);
-            //q.Uris.Add(ServerApp._replicaOneURI);
-            //q.Uris.Add(ServerApp._replicaTwoURI);
-
             q.ContactingServerUri.Add(ServerApp._primaryURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaTwoURI);
+
+            byte[] data = Encoding.Default.GetBytes(q.ToString());
+            byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
+            SignedQueryByName signedQuery = new SignedQueryByName(q, signature);
 
             foreach (Friend i in ServerApp._user.Friends)
             {
@@ -159,85 +144,10 @@ namespace Server
                     friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                         i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
                     remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);
-                    remoteDel.BeginInvoke(q, null, null);
+                    remoteDel.BeginInvoke(signedQuery, null, null);
                 }
             }
         }
-
-        /*public void lookupInterest(QueryByInterest q)
-        {
-            //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " lookupInterest " + q.Interest);
-            ServerToServerServices friend;
-            RemoteAsyncLookupInterestDelegate remoteDel;
-            ClientServices client;
-
-            if (!ServerApp._serviceAvailable)
-            {
-                client = ((ClientServices)Activator.GetObject(typeof(ClientServices),
-                    ServerApp._clientUri + "/" + ServicesNames.ClientServicesName));
-                new RemoteAsyncServiceUnavailableDelegate(client.serviceUnavailable).BeginInvoke(null, null);
-                return;
-            }
-
-            q.Uris.Add(ServerApp._primaryURI);
-            //q.Uris.Add(ServerApp._replicaOneURI);
-            //q.Uris.Add(ServerApp._replicaTwoURI);
-
-            q.ContactingServerUri.Add(ServerApp._primaryURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaTwoURI);
-
-            foreach (Friend i in ServerApp._user.Friends)
-            {
-                if (i.Uris.ElementAt(0) != null)
-                {
-                    //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " manda lookupInterest para " + i.Uris.ElementAt(0));
-                    friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                        i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                    remoteDel = new RemoteAsyncLookupInterestDelegate(friend.lookupInterest);
-                    remoteDel.BeginInvoke(q, null, null);
-                }
-            }
-        }
-
-        public void lookupSexAge(QueryByGenderAge q)
-        {
-            //System.Windows.Forms.MessageBox.Show("lookup :Client server");
-            ServerToServerServices friend;
-            RemoteAsyncLookupSexAgeDelegate remoteDel;
-            ClientServices client;
-
-            if (!ServerApp._serviceAvailable)
-            {
-                client = ((ClientServices)Activator.GetObject(typeof(ClientServices),
-                    ServerApp._clientUri + "/" + ServicesNames.ClientServicesName));
-                new RemoteAsyncServiceUnavailableDelegate(client.serviceUnavailable).BeginInvoke(null,null);
-                return;
-            }
-
-            q.Uris.Add(ServerApp._primaryURI);
-            //q.Uris.Add(ServerApp._replicaOneURI);
-            //q.Uris.Add(ServerApp._replicaTwoURI);
-
-            q.ContactingServerUri.Add(ServerApp._primaryURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaOneURI);
-            //q.ContactingServerUri.Add(ServerApp._replicaTwoURI);
-
-            foreach (Friend i in ServerApp._user.Friends)
-            {
-                if (i.Uris.ElementAt(0) != null)
-                {
-                    //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Server recebeu e manda lookupSexAge para " + i.Uris.ElementAt(0));
-                    friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                        i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                    remoteDel = new RemoteAsyncLookupSexAgeDelegate(friend.lookupSexAge);
-                    //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : client server : sending to " + i.Uris.ElementAt(0));
-                    remoteDel.BeginInvoke(q, null, null);
-                }
-            }
-        }
-
-        /*public void RemoteAsyncLookupNameCallBack(IAsyncResult ar) { System.Windows.Forms.MessageBox.Show("Recebi de volta"); }*/
 
         public void RemoteAsyncgetFriendsPostsCallBack(IAsyncResult ar)
         {

@@ -38,8 +38,9 @@ namespace PADIbookCommonLib
     public delegate Friend RemoteAsyncFriendDelegate(Friend friend);
     public delegate void RemoteAsyncGetFriendPostsDelegate();
     public delegate List<Post> RemoteAsyncSendFriendPostsDelegate();
-    public delegate void RemoteAsyncLookupNameDelegate(QueryByName q);
-    public delegate void RemoteAsyncLookupNameResponseDelegate(String name,String uri,List<RedirectionFile> redList);
+    public delegate void RemoteAsyncLookupNameClientDelegate(QueryByName q);
+    public delegate void RemoteAsyncLookupNameDelegate(SignedQueryByName q);
+    public delegate void RemoteAsyncLookupNameResponseDelegate(SignedLookupResponse response);
     
     //public delegate void RemoteAsynchRemoveOtherReplicaDelegate();
     //public delegate void RemoteAsyncLookupNameResponseDelegate(QueryByName q);
@@ -81,8 +82,8 @@ namespace PADIbookCommonLib
         Friend sendFriendRequest(Friend friend);
         Friend acceptFriendRequest(Friend friend);
         List<Post> getPosts();
-        void lookupname(QueryByName q);
-        void lookupNameResponse(String name, String uri, List<RedirectionFile> redList);
+        void lookupname(SignedQueryByName q);
+        void lookupNameResponse(SignedLookupResponse response);
         void changeNameOfFriend(String name,String primary);
         void getName(String responseUri);
         void shareObject(SignedQueryByFile query);
