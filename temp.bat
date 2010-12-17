@@ -1,4 +1,7 @@
 del *.txt
+del *.xml
+copy temp\* .\
+pause
 start Server\bin\Debug\PKI.exe
 pause
 start Server\bin\Debug\Server.exe 58511 tcp://localhost:50000

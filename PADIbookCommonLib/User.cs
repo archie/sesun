@@ -27,41 +27,17 @@ namespace PADIbookCommonLib
             set { _sentMessages = value; }
         }
 
-        /*public List<String> AnelGeralUris
-        {
-            get { return _anelGeralUris; }
-            set { _anelGeralUris = value; }
-        }
-
-        public Boolean IsRegisteredInAnelGeral
-        {
-            get { return _isRegisteredInAnelGeral; }
-            set { _isRegisteredInAnelGeral = value; }
-        }*/
-
-        /*public List<RegisteredInterest> RegInterests
-        {
-            get { return _regInterests; }
-            set { _regInterests = value; }
-        }*/
-
         public List<QueryByFile> ReceivedFileMessages
         {
-            get { return _receivedFileMessages; }
-            set { _receivedFileMessages = value; }
+            get;
+            set;
         }
 
         public List<QueryByName> ReceivedNameMessages
         {
-            get { return _receivedNameMessages; }
-            set { _receivedNameMessages = value; }
+            get;
+            set;
         }
-
-        /*public List<Interest> Interests
-        {
-            get { return _interests; }
-            set { _interests = value; }
-        }*/
 
         public List<Post> UserPosts
         {
@@ -105,22 +81,6 @@ namespace PADIbookCommonLib
             set { _spoofAdress = value; }
         }
 
-        /*public String Gender
-        {
-            get { return _gender; }
-            set { _gender = value; }
-        }
-        public int Age
-        {
-            get { return _age; }
-            set { _age = value; }
-        }
-        public DateTime BirthDate
-        {
-            get { return _birthDate; }
-            set { _birthDate = value; _age = DateTime.Now.Year - value.Year; }
-        }
-        */
         public void addObject(ObjectFile file)
         {
             _objectList.Add(file);
@@ -198,7 +158,6 @@ namespace PADIbookCommonLib
 
         public User(String addr)
         {
-            //_interests = new List<Interest>();
             _userPosts = new List<Post>();
             _friends = new List<Friend>();
             _pendingFriends = new List<Friend>();
@@ -208,9 +167,7 @@ namespace PADIbookCommonLib
             _receivedNameMessages = new List<QueryByName>();
             _receivedFileMessages = new List<QueryByFile>();
             _sentMessages = new List<DateTime>();
-            //_anelGeralUris = new List<String>();
-            //_regInterests = new List<RegisteredInterest>();
-            //_isRegisteredInAnelGeral = false;
+
             _spoofAdress = addr;
             _username = "Default node ID";
         }
@@ -227,33 +184,9 @@ namespace PADIbookCommonLib
             _receivedNameMessages = new List<QueryByName>();
             _receivedFileMessages = new List<QueryByFile>();
             _sentMessages = new List<DateTime>();
-            //_anelGeralUris = new List<String>();
-            //_regInterests = new List<RegisteredInterest>();
-            //_isRegisteredInAnelGeral = false;
             _spoofAdress = "";
             _username = "Default node ID";
         }
-
-        /*public User(String uname)
-        {
-            //_interests = new List<Interest>();
-            _userPosts = new List<Post>();
-            _friends = new List<Friend>();
-            _pendingFriends = new List<Friend>();
-            _username = uname;
-            //_gender = "M";
-            //_birthDate = new DateTime(1988, 4, 1);
-            //_age = DateTime.Now.Year - _birthDate.Year;
-
-            //_interests.Add(Interest.Comics);
-            //_interests.Add(Interest.Games);
-
-            _receivedMessages = new List<DateTime>();
-            _anelGeralUris = new List<String>();
-            //_regInterests = new List<RegisteredInterest>();
-            _isRegisteredInAnelGeral = false;
-
-        }*/
 
     }
 }

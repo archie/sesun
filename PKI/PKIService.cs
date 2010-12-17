@@ -194,7 +194,7 @@ namespace PKI
         private void printPKIkeys()
         {
             Console.WriteLine("---------------- Key -------------------");
-            Console.WriteLine(PKIService._rsa.ToXmlString(false));
+            Console.WriteLine(PKIService._rsa.ToXmlString(true));
             Console.WriteLine("----------------------------------------");
         }
 

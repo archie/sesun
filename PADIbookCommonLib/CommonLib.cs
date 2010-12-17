@@ -42,18 +42,12 @@ namespace PADIbookCommonLib
     public delegate void RemoteAsyncLookupNameDelegate(SignedQueryByName q);
     public delegate void RemoteAsyncLookupNameResponseDelegate(SignedLookupResponse response);
     
-    //public delegate void RemoteAsynchRemoveOtherReplicaDelegate();
-    //public delegate void RemoteAsyncLookupNameResponseDelegate(QueryByName q);
     public delegate void RemoteAsyncChangeNameInFriendsDelegate(String name,String primary);
     public delegate void RemoteAsyncRefreshFriendsDelegate();
-    //public delegate void RemoteAsyncLookupSexAgeDelegate(QueryByGenderAge q);
     public delegate void RemoteAsyncGetNameDelegate(String uri);
     public delegate void RemoteAsyncShareObjectDelegate(SignedQueryByFile query);
     public delegate void RemoteAsyncChangeFriendUriDelegate(string oldUri, string newUri);
-    //public delegate void RemoteAsyncLookupInterestDelegate(QueryByInterest q);
     public delegate void RemoteAsyncServiceUnavailableDelegate();
-    //public delegate void RemoteAsyncRegisterInterestInRingDelegate(MessageRegister m);
-    //public delegate void RemoteAsynChangeRingDelegate(MessageInsertRing m);
 
     public interface ClientToServerServices
     {
@@ -73,8 +67,6 @@ namespace PADIbookCommonLib
         void lookupname(QueryByName q);
         void refreshAllFriendNames();
         void shareObject(ObjectFile file);
-        //void lookupSexAge(QueryByGenderAge q);
-        //void lookupInterest(QueryByInterest q);
     }
 
     public interface ServerToServerServices
@@ -87,29 +79,15 @@ namespace PADIbookCommonLib
         void changeNameOfFriend(String name,String primary);
         void getName(String responseUri);
         void shareObject(SignedQueryByFile query);
-        //void lookupSexAge(QueryByGenderAge q);
-        //void lookupSexAgeResponse(QueryByGenderAge q);
         void changeFriendUri(string oldFriendUri, string newFriendUri);
-        /*void lookupGeneralRing(QueryByInterest q);
-        void lookupGeneralRingResponse(QueryByInterest q);
-        void registerInterestInRing(MessageRegister message);
-        void ChangeInterestRingFriends(MessageInsertRing message);
-        void ChangeGeneralRingFriends(MessageInsertRing message);*/
-        //void lookupInterest(QueryByInterest q);
-        //void lookupInterestResponse(QueryByInterest q);
     }
 
     public interface ReplicationServices
     {
-        //User registerReplica(string uri);
         Post sendPost(Post post);
         void modifyUserProfile(DateTime time, String name, String gen, List<Interest> inter);
         Friend sendFriendRequest(Friend friend);
         Friend acceptFriendRequest(Friend friend);
-        //void sendOtherReplica(string uri);
-        //void isAlive();
-        //void removeOtherReplica();
-        //string imTheLeader(string uri);
         void sendClientUri(string clientUri);
         void sendPrimaryUri(string primaryUri);
         void changeFriendUri(string oldFriendUri, string newFriendUri);
@@ -117,7 +95,6 @@ namespace PADIbookCommonLib
 
     public interface ClientServices
     {
-        //void receiveAllPosts(List<Post> posts);
         void receivePost(Post post);
         void receiveFriendPosts(List<Post> listaposts);
         Friend sendFriendRequest(Friend friend);

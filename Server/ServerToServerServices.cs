@@ -83,7 +83,7 @@ namespace Server
                     contactingName = f.Name;
                 }
             }
-            MessageBox.Show(ServerApp._user.Username + "says that signedQuery.Query.Name=" + contactingName);
+            //MessageBox.Show(ServerApp._user.Username + "says that signedQuery.Query.Name=" + contactingName);
             UserEntry userToVerify = ServerApp._pkiCommunicator.GetVerifiedUserPublicKey(contactingName);
             if (userToVerify == null)
             {
@@ -91,23 +91,17 @@ namespace Server
                 return false;
             }
             rsaWithPublicKeyOfRemoteUser.FromXmlString(userToVerify.PubKey);
+            //MessageBox.Show("pubkey of user: " + userToVerify.NodeId + " with key: " + userToVerify.PubKey);
             byte[] data = Encoding.Default.GetBytes(signedQuery.Query.ToString());
             return rsaWithPublicKeyOfRemoteUser.VerifyData(data, "SHA1", signedQuery.Signature);
         }
 
         public void shareObject(SignedQueryByFile signedQuery)
         {
-            RemoteAsyncShareObjectDelegate del;
-            ServerToServerServices friend;
-            Friend predecessor = null;
-            List<QueryByFile> messageList = new List<QueryByFile>();
-            List<String> contacting = new List<string>();
-            int i, j,counting;
-            QueryByFile q1, q2;
             Boolean sendMessage = false;
             QueryByFile query = signedQuery.Query;
 
-            MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
+            //MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
 
             if (ServerApp._user.SentMessages.Contains(query.Id))
             {
@@ -115,41 +109,139 @@ namespace Server
                 return;
             }
 
-            contacting.Add(ServerApp._myUri);
+            if (ServerApp._user.ReceivedFileMessages.Contains(signedQuery.Query))
+            {
+                MessageBox.Show(ServerApp._user.Username + " : Message was already received so the request was discarted!");
+                return;
+            }
 
             if (!queryIsVerified(signedQuery))
             {
                 MessageBox.Show("Could not verify signed query.");
                 return;
             }
+
             ServerApp._user.ReceivedFileMessages.Add(query);
+
+
+            if (signedQuery.Query.ContactingServerUri.ElementAt(0).CompareTo(signedQuery.Query.Uris.ElementAt(0)) == 0)
+            {
+                //In this case the sender of the message is the same that originated it. 
+                //So if an attacker tries to do this he'll be the one receiving the responses in the end.
+                //But the true requester will still get the right response.
+                sendMessage = true;
+
+            }
+            else
+            {
+                sendMessage = consensus(query);
+            }
+
+            if (sendMessage)
+            {
+                keepOrForward(query);
+            }
+        }
+
+        private void keepOrForward(QueryByFile query)
+        {
+            RemoteAsyncShareObjectDelegate del;
+            ServerToServerServices friend;
+            Friend predecessor = null;
+            QueryByFile q1;
+            List<String> contacting = new List<string>();
+            contacting.Add(ServerApp._myUri);
+            if (ServerApp._user.Username[0] == query.Name[0])
+            {
+                //should store in redirection
+                MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
+                ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                return;
+            }
+            else
+            {
+                foreach (Friend node in ServerApp._user.Friends)
+                    if (!node.SucessorSwarm)
+                    {
+                        predecessor = node;
+                        break;
+                    }
+                if (predecessor == null)
+                {
+                    MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
+                    return;
+                }
+                if (predecessor.Name[0] > ServerApp._user.Username[0] && query.Name[0] > predecessor.Name[0])
+                {
+                    //should store in redirection
+                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
+                    ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                    return;
+                }
+                if (query.Name[0] > predecessor.Name[0] && query.Name[0] < ServerApp._user.Username[0])
+                {
+                    //should store in redirection
+                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
+                    ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
+                    return;
+                }
+                //if(lower[0] >= ServerApp._user.Username[0])
+
+                //should continue sending
+                foreach (Friend f in ServerApp._user.Friends)
+                {
+                    if (f.Uris.ElementAt(0) != null && f.SucessorSwarm)
+                    {
+                        if (f.Uris.ElementAt(0).CompareTo(query.ContactingServerUri.ElementAt(0)) != 0)
+                        {
+                            MessageBox.Show(ServerApp._myUri + " sending a request to share to " + f.Uris.ElementAt(0));
+                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
+                                f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
+
+
+                            q1 = new QueryByFile(query.Name, query.Uris, contacting,
+                                (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username, query.Id);
+
+                            byte[] data = Encoding.Default.GetBytes(q1.ToString());
+                            byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
+                            SignedQueryByFile signedForwardQuery = new SignedQueryByFile(q1, signature);
+
+                            del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
+                            del.BeginInvoke(signedForwardQuery, null, null);
+                        }
+                    }
+                }
+
+            }
+        }
+        
+
+        private bool consensus(Query query)
+        {
+            int i, j, counting;
+            List<Query> messageList = getList(query);
+            bool sendMessage = false;
+            Query q1, q2;
 
             //Checks if it has received #predecessors/2 answers, if so it responds and stores Datetime on sentMessages
             //otherwise it adds query to receivedMessages
-            foreach (QueryByFile q in ServerApp._user.ReceivedFileMessages)
-            {
-                if (q.Id.Equals(query.Id)){
-                    messageList.Add(q);
-                }
-            }
+            
 
-            MessageBox.Show("MessageCount = " + messageList.Count + " predecessors count = "+ ServerApp._user.Friends.Count(x => !x.SucessorSwarm));
+            MessageBox.Show("MessageCount = " + messageList.Count + " predecessors count = " + ServerApp._user.Friends.Count(x => !x.SucessorSwarm));
 
             if (messageList.Count > ServerApp._user.Friends.Count(x => !x.SucessorSwarm) / 2)
             {
                 //anwer message
                 //do consensus thing------------------------------
 
-                for (i = 0; i<messageList.Count;i++ )
+                for (i = 0; i < messageList.Count; i++)
                 {
                     q1 = messageList.ElementAt(i);
                     counting = 0;
-                    for (j = i + 1;j<messageList.Count ;j++ )
+                    for (j = i + 1; j < messageList.Count; j++)
                     {
                         q2 = messageList.ElementAt(j);
-                        if (q1.Name.CompareTo(q2.Name) == 0 &&
-                            q1.LowestId.CompareTo(q2.LowestId) == 0 &&
-                            q1.Uris.ElementAt(0).CompareTo(q2.Uris.ElementAt(0)) == 0)
+                        if (q1.CompareTo(q2))
                             counting++;
 
                     }
@@ -159,87 +251,15 @@ namespace Server
                         break;
                     }
                 }
-
-                //-------------------------------------------------
-
-                if(sendMessage){
-
-                    if (ServerApp._user.Username[0] == query.Name[0])
-                    {
-                        //should store in redirection
-                        MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
-                        ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
-                        return;
-                    }
-                    else
-                    {
-                        foreach (Friend node in ServerApp._user.Friends)
-                            if (!node.SucessorSwarm)
-                            {
-                                predecessor = node;
-                                break;
-                            }
-                        if (predecessor == null)
-                        {
-                            MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
-                            return;
-                        }
-                        if (predecessor.Name[0] > ServerApp._user.Username[0] && query.Name[0] > predecessor.Name[0])
-                        {
-                            //should store in redirection
-                            MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
-                            ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
-                            return;
-                        }
-                        if (query.Name[0] > predecessor.Name[0] && query.Name[0] < ServerApp._user.Username[0])
-                        {
-                            //should store in redirection
-                            MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
-                            ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
-                            return;
-                        }
-                        //if(lower[0] >= ServerApp._user.Username[0])
-
-                        //should continue sending
-                        foreach (Friend f in ServerApp._user.Friends)
-                        {
-                            if (f.Uris.ElementAt(0) != null && f.SucessorSwarm)
-                            {
-                                if (f.Uris.ElementAt(0).CompareTo(query.ContactingServerUri.ElementAt(0)) != 0)
-                                {
-                                    //MessageBox.Show(ServerApp._myUri + " sending a request to share to " + f.Uris.ElementAt(0));
-                                    friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                                        f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-
-
-                                    q1 = new QueryByFile(query.Name, query.Uris, contacting,
-                                        (ServerApp._user.Username[0] > query.LowestId[0]) ? query.LowestId : ServerApp._user.Username,query.Id);
-                                    
-                                    byte[] data = Encoding.Default.GetBytes(q1.ToString());
-                                    byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
-                                    SignedQueryByFile signedForwardQuery = new SignedQueryByFile(q1, signature);
-
-                                    del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
-                                    del.BeginInvoke(signedForwardQuery, null, null);
-                                }
-                            }
-                        }
-
-                    }
-                }
-                else
+                if(sendMessage == false)
                     MessageBox.Show(ServerApp._user.Username + " : There are enough messages but still no consensus.");
+                //-------------------------------------------------
             }
             else
             {
                 MessageBox.Show(ServerApp._user.Username + " : Still not enough messages to do consensus.");
             }
-
-            //MessageBox.Show("MARCUS owns c#" + ServerApp._user.ReceivedFileMessages.Count(x => x.Id.Equals(query.Id)));
-            //ServerApp._user.ReceivedMessages.Add(nounce);
-
-            //MessageBox.Show(ServerApp._myUri + " testing " + file.FileName[0] + " vs " + ServerApp._user.Username[0]);
-
+            return sendMessage;
         }
 
         public void getName(String responseUri)
@@ -253,65 +273,136 @@ namespace Server
         public void lookupname(SignedQueryByName incomingQuery)
         {
             ServerToServerServices friend;
-            ServerToServerServices origin;
             RemoteAsyncLookupNameDelegate remoteDel;
-            RemoteAsyncLookupNameResponseDelegate remoteResDel;
             QueryByName q = incomingQuery.Query;
             QueryByName newQ = new QueryByName(q.Name, q.Uris, new List<string>(),q.Id);
             newQ.ContactingServerUri.Clear();
             newQ.ContactingServerUri.Add(ServerApp._primaryURI);
+            bool sendMessage = false;
 
-            foreach (Query qu in ServerApp._user.ReceivedNameMessages)
+            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Received the request.");
+            
+            if (ServerApp._user.SentMessages.Contains(incomingQuery.Query.Id))
             {
-                if (qu.Id.Equals(qu.Id))
+                MessageBox.Show(ServerApp._user.Username + " : Message was already sent so the request was discarted!");
+                return;
+            }
+
+            if (ServerApp._user.ReceivedNameMessages.Contains(incomingQuery.Query))
+            {
+                MessageBox.Show(ServerApp._user.Username + " : Message was already received so the request was discarted!");
+                return;
+            }
+
+            //foreach (Query qu in ServerApp._user.ReceivedNameMessages)
+            //{
+            //    if (qu.Id.Equals(q.Id))
+            //    {
+            //        MessageBox.Show(ServerApp._user.Username + " Have already received a message. Returning.");
+            //        return;
+            //    }
+            //}
+
+            if (!isLookupQueryValid(incomingQuery)) {
+                MessageBox.Show(ServerApp._user.Username + " Could not verify lookup message");
+                return;
+            }
+
+            ServerApp._user.ReceivedNameMessages.Add(q);
+
+            //Is it receiving this message from the original requester? if so doesnt need consensus. (check expl @ shareObject())
+            if (incomingQuery.Query.ContactingServerUri.ElementAt(0).CompareTo(incomingQuery.Query.Uris.ElementAt(0)) == 0)
+            {
+                //Does not need consensus
+                MessageBox.Show(ServerApp._user.Username + ": Does not need consensus!");
+                sendMessage = true;
+            }
+            else
+            {
+                //consensus
+                sendMessage = consensus(incomingQuery.Query);
+
+            }
+
+            if (sendMessage)
+            {
+                MessageBox.Show(ServerApp._user.Username + ": Reached consensus!");
+                if (ServerApp._user.Username[0] == q.Name[0])
                 {
+                    sendResponseToLookupQuery(q);
                     return;
                 }
-            }
-            ServerApp._user.ReceivedNameMessages.Add(q);
-            //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " :O nome a testar e" + q.Name);
-
-            /* verify incoming q before sending response */ 
-
-            if (ServerApp._user.Username.CompareTo(q.Name) == 0)
-            {
-                //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + "@" + ServerApp._primaryURI + " :Olha e o meu nome");
-                String i = q.Uris.ElementAt(0);
-                origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                        i + "/" + ServicesNames.ServerToServerServicesName));
-                remoteResDel = new RemoteAsyncLookupNameResponseDelegate(origin.lookupNameResponse);
-
-                /* sign response */
-                string data = getResponseDataForHash();
-                byte[] bytestreamData = Encoding.Default.GetBytes(data);
-                byte[] responseSignature = ServerApp._rsaProvider.SignData(bytestreamData, "SHA1");
-                SignedLookupResponse signedLookupResponse =
-                    new SignedLookupResponse(ServerApp._user.Username, ServerApp._myUri, 
-                        ServerApp._user.RedirectionList, responseSignature);
-                remoteResDel.BeginInvoke(signedLookupResponse, null, null);
-            }
 
 
-            /* sign the query which we send to our friends */
-            byte[] queryData = Encoding.Default.GetBytes(newQ.ToString());
-            byte[] signature = ServerApp._rsaProvider.SignData(queryData, "SHA1");
-            SignedQueryByName signedNewNameQuery = new SignedQueryByName(newQ, signature);
+                /* sign the query which we send to our friends */
+                byte[] queryData = Encoding.Default.GetBytes(newQ.ToString());
+                byte[] signature = ServerApp._rsaProvider.SignData(queryData, "SHA1");
+                SignedQueryByName signedNewNameQuery = new SignedQueryByName(newQ, signature);
 
-            foreach (Friend i in ServerApp._user.Friends)
-            {
-                if (i.Uris.ElementAt(0) != null && i.SucessorSwarm)
+                foreach (Friend i in ServerApp._user.Friends)
                 {
-                    if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
+                    if (i.Uris.ElementAt(0) != null && i.SucessorSwarm)
                     {
-                        //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : Vou enviar a quem ainda n enviei : " + i.Uris.ElementAt(0));
-                        friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
-                            i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
-                        remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);
-                        remoteDel.BeginInvoke(signedNewNameQuery, null, null);
+                        if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
+                        {
+                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : forwarding to : " + i.Uris.ElementAt(0));
+                            friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
+                                i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
+                            remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);
+                            remoteDel.BeginInvoke(signedNewNameQuery, null, null);
+                        }
+
                     }
-                    
                 }
             }
+            else
+                MessageBox.Show(ServerApp._user + ": Didn't reach consensus yet!");
+        }
+
+        private string whoSentQuery(QueryByName query)
+        {
+            foreach (Friend f in ServerApp._user.Friends)
+            {
+                if (f.Uris.ElementAt(0).CompareTo(query.ContactingServerUri.ElementAt(0)) == 0)
+                    return f.Name;
+            }
+            MessageBox.Show(ServerApp._user.Username + "WhoIsUri called with invalid node uri");
+            return "";
+        }
+
+        private bool isLookupQueryValid(SignedQueryByName signedQuery)
+        {
+            UserEntry responder = ServerApp._pkiCommunicator.GetVerifiedUserPublicKey(whoSentQuery(signedQuery.Query));
+            if (responder != null)
+            {
+                RSACryptoServiceProvider responderProvider = new RSACryptoServiceProvider();
+                responderProvider.FromXmlString(responder.PubKey);
+                byte[] data = Encoding.Default.GetBytes(signedQuery.Query.ToString());
+                return responderProvider.VerifyData(data, "SHA1", signedQuery.Signature);
+            }
+            else
+                return false;
+        }
+
+        private void sendResponseToLookupQuery(QueryByName q)
+        {
+            ServerToServerServices origin;
+            RemoteAsyncLookupNameResponseDelegate remoteResDel;
+
+            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + "@" + ServerApp._primaryURI + " :Olha e o meu nome");
+            String i = q.Uris.ElementAt(0);
+            origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
+                    i + "/" + ServicesNames.ServerToServerServicesName));
+            remoteResDel = new RemoteAsyncLookupNameResponseDelegate(origin.lookupNameResponse);
+
+            /* sign response */
+            string data = getResponseDataForHash();
+            byte[] bytestreamData = Encoding.Default.GetBytes(data);
+            byte[] responseSignature = ServerApp._rsaProvider.SignData(bytestreamData, "SHA1");
+            SignedLookupResponse signedLookupResponse =
+                new SignedLookupResponse(ServerApp._user.Username, ServerApp._myUri,
+                    ServerApp._user.RedirectionList, responseSignature);
+            remoteResDel.BeginInvoke(signedLookupResponse, null, null);
         }
 
         private string getResponseDataForHash()
@@ -324,24 +415,44 @@ namespace Server
 
         public void lookupNameResponse(SignedLookupResponse signedResponse)
         {
-            /* verify before */
-            string name = signedResponse.Username;
-            string uri = signedResponse.Uri;
-            List<RedirectionFile> redList = signedResponse.FileList;
-            //System.Windows.Forms.MessageBox.Show("lookupNameResponse");
-            ClientServices cliente = (ClientServices)Activator.GetObject(
-                typeof(ClientServices),
-                ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
-            cliente.lookupNameResponse(name,uri,redList);
+            if (IsResponseLookupNameMessageValid(signedResponse))
+            {
+                string name = signedResponse.Username;
+                string uri = signedResponse.Uri;
+                List<RedirectionFile> redList = signedResponse.FileList;
+                
+                ClientServices cliente = (ClientServices)Activator.GetObject(
+                    typeof(ClientServices),
+                    ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
+                cliente.lookupNameResponse(name, uri, redList);
+            }
+        }
+
+        private bool IsResponseLookupNameMessageValid(SignedLookupResponse signedResponse)
+        {
+            bool result = false;
+
+            UserEntry responder = ServerApp._pkiCommunicator.GetVerifiedUserPublicKey(signedResponse.Username);
+            if (responder != null)
+            {
+                
+                RSACryptoServiceProvider responderProvider = new RSACryptoServiceProvider();
+                responderProvider.FromXmlString(responder.PubKey);
+                string data = signedResponse.Username + signedResponse.Uri;
+                foreach (RedirectionFile f in signedResponse.FileList)
+                    data += f.ToString();
+                byte[] bytedata = Encoding.Default.GetBytes(data);
+                if (responderProvider.VerifyData(bytedata, "SHA1", signedResponse.Signature))
+                    result = true;
+                else
+                    result = false;
+            }
+            
+            return result;
         }
 
         public Friend acceptFriendRequest(Friend friend)
         {
-            //string[] replicasURIs = { ServerApp._replicaOneURI, ServerApp._replicaTwoURI };
-
-            //ReplicationServices replica;
-            //RemoteAsyncFriendDelegate remoteDel;
-
             try
             {
                 friend.SucessorSwarm = true;
@@ -353,16 +464,6 @@ namespace Server
                 System.Windows.Forms.MessageBox.Show(ex.Message);
                 return null;
             }
-
-            /*foreach (string uri in replicasURIs)
-            {
-                if (uri != null)
-                {
-                    replica = ((ReplicationServices)Activator.GetObject(typeof(ReplicationServices), uri + "/" + ServicesNames.ReplicationServicesName));
-                    remoteDel = new RemoteAsyncFriendDelegate(replica.acceptFriendRequest);
-                    remoteDel.BeginInvoke(friend, null, null);
-                }
-            }*/
 
             ClientServices client = (ClientServices)Activator.GetObject(typeof(ClientServices),
                ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
@@ -413,6 +514,31 @@ namespace Server
         public void FreezeService(int time)
         {
             Thread.Sleep(time);
+        }
+
+        private List<Query> getList(Query query)
+        {
+            List<Query> messageList = new List<Query>();
+            List<Query> messages = new List<Query>();
+            if (query is QueryByFile)
+            {
+                foreach (QueryByFile q in ServerApp._user.ReceivedFileMessages)
+                    messages.Add(q);
+            }
+            else
+            {
+                foreach (QueryByName q in ServerApp._user.ReceivedNameMessages)
+                    messages.Add(q);
+            }
+
+            foreach (Query q in messages)
+            {
+                if (q.Id.Equals(query.Id))
+                {
+                    messageList.Add(q);
+                }
+            }
+            return messageList;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace PADIbookCommonLib
                 //Verify the hash and the signature
                 if (pkiRsaProvider.VerifyData(data, "SHA1", response.Signature))
                 {
-                    MessageBox.Show("GetVerifiedUserPublicKey : was able to verify the response with: " + pkiRsaProvider.ToXmlString(false));
+                    //MessageBox.Show("GetVerifiedUserPublicKey : was able to verify the response with: " + pkiRsaProvider.ToXmlString(false));
                     return response.Entry;
                 }
             }

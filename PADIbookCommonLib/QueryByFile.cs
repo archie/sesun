@@ -31,5 +31,16 @@ namespace PADIbookCommonLib
             return Name + Uris.ElementAt(0) + ContactingServerUri.ElementAt(0) + LowestId + Id.ToString();
         }
 
+        override public bool CompareTo(Query o)
+        {
+            QueryByFile q2 = (QueryByFile)o;
+            if (this.Name.CompareTo(q2.Name) == 0 &&
+                            this.LowestId.CompareTo(q2.LowestId) == 0 &&
+                            this.Uris.ElementAt(0).CompareTo(q2.Uris.ElementAt(0)) == 0)
+                return true;
+            else
+                return false;
+        }
+
     }
 }

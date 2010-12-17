@@ -6,7 +6,7 @@ using System.Text;
 namespace PADIbookCommonLib
 {
     [Serializable]
-    public class Query
+    abstract public class Query
     {
         private DateTime _id;
         private List<string> _contactingServerUri;
@@ -59,5 +59,7 @@ namespace PADIbookCommonLib
             _id = id;
             _name = name;
         }
+
+        abstract public bool CompareTo(Query o);
     }
 }

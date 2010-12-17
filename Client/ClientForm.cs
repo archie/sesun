@@ -591,30 +591,17 @@ namespace Client
             this.lookupResultTextBox.Clear();
             QueryByName q = new QueryByName(this.lookupName.Text, new List<String>(), new List<String>(),DateTime.Now);
             RemoteAsyncLookupNameClientDelegate del = new RemoteAsyncLookupNameClientDelegate(_server.lookupname);
-            del.BeginInvoke(q, null, null);/*TODO CALLBACK*/
+            del.BeginInvoke(q, null, null);
+            
         }
 
-        /*private void lookupInterestButton_Click(object sender, EventArgs e)
-        {
-            this.lookupResultTextBox.Clear();
-            QueryByInterest q = new QueryByInterest(ClientApp._user.Username,this.lookupInterest.Text, new List<String>(), new List<String>());
-            RemoteAsyncLookupInterestDelegate del = new RemoteAsyncLookupInterestDelegate(_server.lookupInterest);
-            del.BeginInvoke(q, null, null);/*TODO CALLBACK
-            
-        }*/
+
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        /*private void lookupSexAgeButton_Click(object sender, EventArgs e)
-        {
-            this.lookupResultTextBox.Clear();
-            QueryByGenderAge q = new QueryByGenderAge(this.lookupSex.Text, (int)this.lookupAge.Value, new List<String>(), new List<String>());
-            RemoteAsyncLookupSexAgeDelegate del = new RemoteAsyncLookupSexAgeDelegate(_server.lookupSexAge);
-            del.BeginInvoke(q, null, null);/*TODO CALLBACK
-        }*/
 
         private void ClientForm_Load(object sender, EventArgs e)
         {

@@ -118,7 +118,10 @@ namespace PKI
             {
                 if (ue.NodeId.Equals(id))
                 {
-                    Console.WriteLine("Returning user entry (with public key) for id: " + id);
+                    Console.WriteLine("Returning user entry (with public key) for id: " + ue.NodeId);
+                    Console.WriteLine("-------------------- Key ------------------------");
+                    Console.WriteLine(ue.PubKey);
+                    Console.WriteLine("------------------ End Key ----------------------");
                     return PKIService.sign(ue);
                 }
             }

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace PADIbookCommonLib
 {
+    [Serializable]
     public class SignedLookupResponse : SignedMessage
     {
         public List<RedirectionFile> FileList { get; set; }
@@ -18,5 +19,7 @@ namespace PADIbookCommonLib
             Uri = uri;
             FileList = filelist;
         }
+
+        public SignedLookupResponse() : base() { }
     }
 }

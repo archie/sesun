@@ -114,7 +114,7 @@ namespace Server
 
         public void lookupname(QueryByName q)
         {
-            //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " lookupname " + q.Name);
+            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " lookupname " + q.Name);
             ServerToServerServices friend;
             RemoteAsyncLookupNameDelegate remoteDel;
             ClientServices client;
@@ -139,8 +139,6 @@ namespace Server
             {
                 if (i.Uris.ElementAt(0) != null && i.SucessorSwarm) //only sends to the sucessor nodes
                 {
-
-                    //System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " manda lookupName para " + i.Uris.ElementAt(0));
                     friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                         i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
                     remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);

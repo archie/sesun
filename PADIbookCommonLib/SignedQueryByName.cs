@@ -5,6 +5,7 @@ using System.Text;
 
 namespace PADIbookCommonLib
 {
+    [Serializable]
     public class SignedQueryByName : SignedMessage 
     {
         public QueryByName Query { get; set; }
@@ -13,6 +14,11 @@ namespace PADIbookCommonLib
             : base(signature)
         {
             Query = query;
+        }
+
+        public SignedQueryByName()
+            : base()
+        {
         }
     }
 }

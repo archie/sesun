@@ -104,12 +104,10 @@ namespace Server
             _myUserEntry = new UserEntry();
             _myUserEntry.NodeId = _user.Username;
             _myUserEntry.Address = _myUri;
-            _myUserEntry.PubKey = _rsaProvider.ToXmlString(true);
+            _myUserEntry.PubKey = _rsaProvider.ToXmlString(false);
             
             if (_pkiCommunicator.Register(_myUserEntry))
             {
-                UserEntry check = _pkiCommunicator.GetVerifiedUserPublicKey("3-0");
-                MessageBox.Show("Checkin... " + check.Address + " KEY : " + check.PubKey);
                 Application.Run(_form);
             }
             else
