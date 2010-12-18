@@ -44,9 +44,9 @@ namespace PKI
         {
             Console.WriteLine("Got register request from: " + entry.NodeId);
 
-            if (IsRegistered(entry) || IsInPending(entry))
+            if (IsInPending(entry))
             {
-                Console.WriteLine("Denying access. User with same name/address exists.");
+                Console.WriteLine("Denying access. User with same name/address is pending.");
                 return null; // user with same id is already registered, deny
             }
 
@@ -86,7 +86,13 @@ namespace PKI
                 {
                     Console.WriteLine("Received response matched challenge. " +
                         "(Verified with " + response.Sender + " public key)");
-                    userDB.AddFirst(pendingUser);
+
+                    if (!IsRegistered(pendingUser.NodeId))
+                        userDB.AddFirst(pendingUser);
+                    else
+                        // update timeout of user ( not implemented )
+                        userDB.AddFirst(pendingUser);
+
                     waitingChallenge.Remove(pendingUser);
                     return true;
                 }
@@ -113,19 +119,18 @@ namespace PKI
             return false;
         }
 
-        /* should probably use IComparable on UserEntry objects */
-        public bool IsRegistered(UserEntry entry)
-        {
-            return userDB.Count(delegate(UserEntry e)
-            {
-                return e.NodeId.Equals(entry.NodeId) &&
-                    e.Address.Equals(entry.Address);
-            }) > 0;
-        }
-
         private bool IsInPending(UserEntry entry)
         {
-            return waitingChallenge.ContainsKey(entry);
+            bool result = false;
+            foreach (UserEntry e in waitingChallenge.Keys)
+            {
+                if (e.NodeId.Equals(entry.NodeId) && e.Address.Equals(entry.Address))
+                {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
         }
 
         public SignedEntry GetPublicKey(string id)

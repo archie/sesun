@@ -42,7 +42,7 @@ namespace PADIbookCommonLib
             return Address + Port + NodeId + PubKey;
         }
 
-        int IComparable.CompareTo(UserEntry e)
+        int IComparable<UserEntry>.CompareTo(UserEntry e)
         {
             return String.Compare(this.NodeId, e.NodeId);
         }
