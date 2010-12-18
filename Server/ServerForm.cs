@@ -165,15 +165,9 @@ namespace Server
 
         private void button1_Click(object sender, EventArgs e)
         {
-            /*if (((int)this.delay_seconds.Value) > ((int)this.freeze_period.Value)) {
+            if (this.freeze_period.Value <= 0)
                 return;
-            }
 
-            ServerApp._delay = (((int)this.delay_seconds.Value) * 1000);
-            ServerApp._freeze_period = (((int)this.freeze_period.Value) * 1000);
-            ServerApp._freeze = true;
-            ServerApp._freezeThread.Start();
-            */
             ServerApp.FreezeService(this.freeze_period.Value);
         }
 
