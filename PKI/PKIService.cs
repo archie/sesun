@@ -79,10 +79,13 @@ namespace PKI
             _rsa = new RSACryptoServiceProvider();
             try
             {
-                Console.WriteLine("PKI Public+Private Key exists, loading to memory.");
+                Console.WriteLine("Trying to load pub/priv key for PKI...");
                 TextReader tr = new StreamReader(".\\pki.xml");
-                _rsa.FromXmlString(tr.ReadToEnd());
+                string data = tr.ReadToEnd();
+                Console.WriteLine(data);
+                _rsa.FromXmlString(data);
                 tr.Close();
+                Console.WriteLine("Loaded key, starting service.");
             }
             catch (FileNotFoundException)
             {
@@ -91,7 +94,6 @@ namespace PKI
                 tw.Write(_rsa.ToXmlString(true));
                 tw.Close();
                 
-
                 tw = new StreamWriter(".\\pki_pub.xml");
                 tw.Write(_rsa.ToXmlString(false));
                 tw.Close();

@@ -6,7 +6,7 @@ using System.Text;
 namespace PADIbookCommonLib
 {
     [Serializable]
-    public class UserEntry
+    public class UserEntry : IComparable<UserEntry>
     {
         private string _address;
         private int _port;
@@ -40,6 +40,11 @@ namespace PADIbookCommonLib
         override public string ToString()
         {
             return Address + Port + NodeId + PubKey;
+        }
+
+        int IComparable.CompareTo(UserEntry e)
+        {
+            return String.Compare(this.NodeId, e.NodeId);
         }
     }
 }

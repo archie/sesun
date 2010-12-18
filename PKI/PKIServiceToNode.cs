@@ -43,16 +43,17 @@ namespace PKI
         public byte[] Register(UserEntry entry)
         {
             Console.WriteLine("Got register request from: " + entry.NodeId);
-            
-            if (IsRegistered(entry.NodeId)) // check pending as well...
+
+            if (IsRegistered(entry) || IsInPending(entry))
+            {
+                Console.WriteLine("Denying access. User with same name/address exists.");
                 return null; // user with same id is already registered, deny
-            
+            }
+
             int challenge = _rand.Next();
             byte[] rawChallenge = Encoding.Default.GetBytes(challenge.ToString());
             PendingChallenge pc = new PendingChallenge(rawChallenge, DateTime.Now);
             waitingChallenge.Add(entry, pc);
-
-            Console.WriteLine("Added <" + entry.NodeId + "," + challenge + ">");
 
             return rawChallenge;
         }
@@ -83,7 +84,7 @@ namespace PKI
             {
                 if (rsa.VerifyData(waitingChallenge[pendingUser].Challenge, "SHA1", response.Signature))
                 {
-                    Console.WriteLine("Received response matches the challenge sent. " +
+                    Console.WriteLine("Received response matched challenge. " +
                         "(Verified with " + response.Sender + " public key)");
                     userDB.AddFirst(pendingUser);
                     waitingChallenge.Remove(pendingUser);
@@ -101,6 +102,7 @@ namespace PKI
             return false;
         }
 
+        
         public bool IsRegistered(string id)
         {
             foreach (UserEntry ue in userDB)
@@ -109,6 +111,21 @@ namespace PKI
                     return true;
             }
             return false;
+        }
+
+        /* should probably use IComparable on UserEntry objects */
+        public bool IsRegistered(UserEntry entry)
+        {
+            return userDB.Count(delegate(UserEntry e)
+            {
+                return e.NodeId.Equals(entry.NodeId) &&
+                    e.Address.Equals(entry.Address);
+            }) > 0;
+        }
+
+        private bool IsInPending(UserEntry entry)
+        {
+            return waitingChallenge.ContainsKey(entry);
         }
 
         public SignedEntry GetPublicKey(string id)
