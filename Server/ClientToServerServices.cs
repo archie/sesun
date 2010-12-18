@@ -27,7 +27,7 @@ namespace Server
             byte[] signature = ServerApp._rsaProvider.SignData(data, "SHA1");
             SignedQueryByFile signedQuery = new SignedQueryByFile(query, signature);
 
-            MessageBox.Show(ServerApp._myUri + " wants to share " + file.FileName);
+            MessageBox.Show(ServerApp._user.Username + " :  wants to share " + file.FileName);
 
             foreach (Friend f in ServerApp._user.Friends)
             {
@@ -36,7 +36,7 @@ namespace Server
                     friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                         f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
 
-                    MessageBox.Show(ServerApp._myUri + " sends to " + f.Name);
+                    MessageBox.Show(ServerApp._user.Username + " sends to " + f.Name);
 
                     del = new RemoteAsyncShareObjectDelegate(friend.shareObject);
                     del.BeginInvoke(signedQuery, null, null);

@@ -219,8 +219,12 @@ namespace Server
                 tr.Close();
 
                 ServerApp._user = savedUser;
+                MessageBox.Show("Loaded user : " + savedUser.Username);
             }
-            catch (FileNotFoundException) { ServerApp._user = new User(); }
+            catch (FileNotFoundException) {
+                MessageBox.Show("Couldnt load user from file");
+                ServerApp._user = new User(); 
+            }
             refreshTextBoxes();
         }
 

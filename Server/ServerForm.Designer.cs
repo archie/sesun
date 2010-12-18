@@ -161,7 +161,7 @@
             // 
             // freeze_buttom
             // 
-            this.freeze_buttom.Location = new System.Drawing.Point(251, 383);
+            this.freeze_buttom.Location = new System.Drawing.Point(326, 383);
             this.freeze_buttom.Name = "freeze_buttom";
             this.freeze_buttom.Size = new System.Drawing.Size(75, 23);
             this.freeze_buttom.TabIndex = 16;
@@ -203,7 +203,7 @@
             // 
             // loadButton
             // 
-            this.loadButton.Location = new System.Drawing.Point(326, 383);
+            this.loadButton.Location = new System.Drawing.Point(251, 383);
             this.loadButton.Name = "loadButton";
             this.loadButton.Size = new System.Drawing.Size(75, 23);
             this.loadButton.TabIndex = 21;

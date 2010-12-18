@@ -158,6 +158,7 @@ namespace PADIbookCommonLib
 
         public User(String addr)
         {
+            Random ran = new Random(DateTime.Now.Millisecond);
             _userPosts = new List<Post>();
             _friends = new List<Friend>();
             _pendingFriends = new List<Friend>();
@@ -169,10 +170,11 @@ namespace PADIbookCommonLib
             _sentMessages = new List<DateTime>();
 
             _spoofAdress = addr;
-            _username = "Default node ID";
+            _username = "Default" + ran.Next(1000);
         }
         public User()
         {
+            Random ran = new Random(DateTime.Now.Millisecond);
             //_interests = new List<Interest>();
             _userPosts = new List<Post>();
             _friends = new List<Friend>();
@@ -186,6 +188,7 @@ namespace PADIbookCommonLib
             _sentMessages = new List<DateTime>();
             _spoofAdress = "";
             _username = "Default node ID";
+            _username = "Default" + ran.Next(1000);
         }
 
     }

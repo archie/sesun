@@ -18,11 +18,6 @@ namespace Server
 
         public Friend sendFriendRequest(Friend friend)
         {
-            //string[] replicasURIs = { null, I };
-
-            //ReplicationServices replica;
-            //RemoteAsyncFriendDelegate remoteDel;
-
             MessageBox.Show(ServerApp._user.Username + " -> ServerToserver : sendFriendRequest(adds pending friend) : " + friend.Name + " %s" +friend.Uris.ElementAt(0));
 
             try
@@ -34,16 +29,6 @@ namespace Server
                 System.Windows.Forms.MessageBox.Show(ex.Message);
                 return null;
             }
-
-            /*foreach (string uri in replicasURIs)
-            {
-                if (uri != null)
-                {
-                    replica = ((ReplicationServices)Activator.GetObject(typeof(ReplicationServices), uri + "/" + ServicesNames.ReplicationServicesName));
-                    remoteDel = new RemoteAsyncFriendDelegate(replica.sendFriendRequest);
-                    remoteDel.BeginInvoke(friend, null, null);
-                }
-            }*/
 
             ClientServices client = (ClientServices)Activator.GetObject(typeof(ClientServices),
                 ServerApp._clientUri + "/" + ServicesNames.ClientServicesName);
@@ -96,12 +81,26 @@ namespace Server
             return rsaWithPublicKeyOfRemoteUser.VerifyData(data, "SHA1", signedQuery.Signature);
         }
 
+        private bool isPredecessor(Query q)
+        {
+            foreach (Friend f in ServerApp._user.Friends)
+            {
+                if (q.ContactingServerUri.ElementAt(0).CompareTo(f.Uris.ElementAt(0)) == 0)
+                {
+                    if(!f.SucessorSwarm)
+                        return true;
+                }
+            }
+            return false;
+
+        }
+
         public void shareObject(SignedQueryByFile signedQuery)
         {
             Boolean sendMessage = false;
             QueryByFile query = signedQuery.Query;
 
-            //MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
+            MessageBox.Show(ServerApp._user.Username + " received a request to share " + query.Name);
 
             if (ServerApp._user.SentMessages.Contains(query.Id))
             {
@@ -115,6 +114,13 @@ namespace Server
                 return;
             }
 
+            //only accepts messages from predecessors!
+            if (!isPredecessor(signedQuery.Query))
+            {
+                MessageBox.Show(ServerApp._user.Username + " says " + whoSentQuery(signedQuery.Query)
+                                                         + " is trying to screw the comunication! (whosentMethod)");
+                return;
+            }
             if (!queryIsVerified(signedQuery))
             {
                 MessageBox.Show("Could not verify signed query.");
@@ -140,6 +146,7 @@ namespace Server
             if (sendMessage)
             {
                 keepOrForward(query);
+                ServerApp._user.SentMessages.Add(signedQuery.Query.Id);
             }
         }
 
@@ -154,7 +161,7 @@ namespace Server
             if (ServerApp._user.Username[0] == query.Name[0])
             {
                 //should store in redirection
-                MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj=now)");
+                MessageBox.Show(ServerApp._user.Username + " will put uri on redirection list. (obj=now)");
                 ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
                 return;
             }
@@ -168,20 +175,20 @@ namespace Server
                     }
                 if (predecessor == null)
                 {
-                    MessageBox.Show(ServerApp._myUri + " Inconsistent routing table");
+                    MessageBox.Show(ServerApp._user.Username + " says : Inconsistent routing table");
                     return;
                 }
                 if (predecessor.Name[0] > ServerApp._user.Username[0] && query.Name[0] > predecessor.Name[0])
                 {
                     //should store in redirection
-                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (before>now && obj>before)");
+                    MessageBox.Show(ServerApp._user.Username + " will put uri on redirection list. (before>now && obj>before)");
                     ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
                     return;
                 }
                 if (query.Name[0] > predecessor.Name[0] && query.Name[0] < ServerApp._user.Username[0])
                 {
                     //should store in redirection
-                    MessageBox.Show(ServerApp._myUri + " will put uri on redirection list. (obj>before && obj<now)");
+                    MessageBox.Show(ServerApp._user.Username + " will put uri on redirection list. (obj>before && obj<now)");
                     ServerApp._user.addRedirection(new RedirectionFile(query.Name, query.Uris.ElementAt(0)));
                     return;
                 }
@@ -194,7 +201,7 @@ namespace Server
                     {
                         if (f.Uris.ElementAt(0).CompareTo(query.ContactingServerUri.ElementAt(0)) != 0)
                         {
-                            MessageBox.Show(ServerApp._myUri + " sending a request to share to " + f.Uris.ElementAt(0));
+                            MessageBox.Show(ServerApp._user.Username + " sending a request to share to " + f.Name);
                             friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                                 f.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
 
@@ -219,6 +226,7 @@ namespace Server
         private bool consensus(Query query)
         {
             int i, j, counting;
+            //This list contains all the messages from PREDECESSORS with the same ID
             List<Query> messageList = getList(query);
             bool sendMessage = false;
             Query q1, q2;
@@ -294,14 +302,13 @@ namespace Server
                 return;
             }
 
-            //foreach (Query qu in ServerApp._user.ReceivedNameMessages)
-            //{
-            //    if (qu.Id.Equals(q.Id))
-            //    {
-            //        MessageBox.Show(ServerApp._user.Username + " Have already received a message. Returning.");
-            //        return;
-            //    }
-            //}
+            //only accepts messages from predecessors!
+            if (!isPredecessor(incomingQuery.Query))
+            {
+                MessageBox.Show(ServerApp._user.Username + " says " + whoSentQuery(incomingQuery.Query)
+                                                         + " is trying to screw the comunication!");
+                return;
+            }
 
             if (!isLookupQueryValid(incomingQuery)) {
                 MessageBox.Show(ServerApp._user.Username + " Could not verify lookup message");
@@ -345,7 +352,7 @@ namespace Server
                     {
                         if (i.Uris.ElementAt(0).CompareTo(q.ContactingServerUri.ElementAt(0)) != 0)
                         {
-                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : forwarding to : " + i.Uris.ElementAt(0));
+                            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + " : forwarding to : " + i.Name);
                             friend = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                                 i.Uris.ElementAt(0) + "/" + ServicesNames.ServerToServerServicesName));
                             remoteDel = new RemoteAsyncLookupNameDelegate(friend.lookupname);
@@ -354,12 +361,14 @@ namespace Server
 
                     }
                 }
+
+                ServerApp._user.SentMessages.Add(incomingQuery.Query.Id);
             }
             else
                 MessageBox.Show(ServerApp._user + ": Didn't reach consensus yet!");
         }
 
-        private string whoSentQuery(QueryByName query)
+        private string whoSentQuery(Query query)
         {
             foreach (Friend f in ServerApp._user.Friends)
             {
@@ -389,7 +398,7 @@ namespace Server
             ServerToServerServices origin;
             RemoteAsyncLookupNameResponseDelegate remoteResDel;
 
-            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + "@" + ServerApp._primaryURI + " :Olha e o meu nome");
+            System.Windows.Forms.MessageBox.Show(ServerApp._user.Username + "@" + ServerApp._primaryURI + " : Its my node name!");
             String i = q.Uris.ElementAt(0);
             origin = ((ServerToServerServices)Activator.GetObject(typeof(ServerToServerServices),
                     i + "/" + ServicesNames.ServerToServerServicesName));
@@ -479,36 +488,15 @@ namespace Server
 
         public void changeFriendUri(string oldFriendUri, string newFriendUri)
         {
-            //string[] replicasURIs = { ServerApp._replicaOneURI, ServerApp._replicaTwoURI };
-
-            //ReplicationServices replica;
-            //RemoteAsyncChangeFriendUriDelegate remoteDel;
-
-            //System.Windows.Forms.MessageBox.Show("tou aqui");
             try
             {
                 Friend friend = ServerApp._user.getFriendByUri(oldFriendUri);
-                //System.Windows.Forms.MessageBox.Show(friend.Name + " " + friend.Uris.ElementAt(0));
                 friend.setPrimaryUri(newFriendUri);
-                //System.Windows.Forms.MessageBox.Show(friend.Name + " " + friend.Uris.ElementAt(0));
-
-                //System.Windows.Forms.MessageBox.Show("o novo uri do " + friend.Name + " e " + friend.Uris.ElementAt(0));
             }
             catch (InvalidFriendUriException e)
             {
                 System.Windows.Forms.MessageBox.Show(e.Message);
             }
-
-            /*foreach (string uri in replicasURIs)
-            {
-                if (uri != null)
-                {
-                    replica = ((ReplicationServices)Activator.GetObject(typeof(ReplicationServices),
-                        uri + "/" + ServicesNames.ReplicationServicesName));
-                    remoteDel = new RemoteAsyncChangeFriendUriDelegate(replica.changeFriendUri);
-                    remoteDel.BeginInvoke(oldFriendUri, newFriendUri, null, null);
-                }
-            }*/
         }
 
         public void FreezeService(int time)
@@ -531,6 +519,7 @@ namespace Server
                     messages.Add(q);
             }
 
+            //Only returns messages wich have the same ID and belong to predecessor nodes.
             foreach (Query q in messages)
             {
                 if (q.Id.Equals(query.Id))

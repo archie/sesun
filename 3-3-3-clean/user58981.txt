@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<User xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SentMessages />
+  <ReceivedFileMessages />
+  <ReceivedNameMessages />
+  <UserPosts>
+    <Post>
+      <Text>1-0 added 2-2</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:02:35.1224008+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>1-0 added 2-1</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:03:05.582143+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>1-0 added 2-0</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:03:24.7772409+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>1-0 added 3-0</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:09:35.6884558+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>1-0 added 3-2</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:10:15.3567247+00:00</TimeStamp>
+    </Post>
+    <Post>
+      <Text>1-0 added 3-1</Text>
+      <Autor>1-0</Autor>
+      <TimeStamp>2010-12-18T00:12:53.9217941+00:00</TimeStamp>
+    </Post>
+  </UserPosts>
+  <ObjectList />
+  <RedirectionList />
+  <Friends>
+    <Friend>
+      <SucessorSwarm>true</SucessorSwarm>
+      <Name>2-2</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:58511</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>true</SucessorSwarm>
+      <Name>2-1</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:58961</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>true</SucessorSwarm>
+      <Name>2-0</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:58971</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>false</SucessorSwarm>
+      <Name>3-0</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:58991</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>false</SucessorSwarm>
+      <Name>3-2</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:57941</string>
+      </Uris>
+    </Friend>
+    <Friend>
+      <SucessorSwarm>false</SucessorSwarm>
+      <Name>3-1</Name>
+      <Uris>
+        <string>tcp://169.254.28.0:56941</string>
+      </Uris>
+    </Friend>
+  </Friends>
+  <PendingFriends />
+  <Username>1-0</Username>
+  <SpoofAdress>tcp://169.254.28.0:58981</SpoofAdress>
+</User>
